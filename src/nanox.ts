@@ -76,7 +76,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     // sandbox
     const self = this;
     this.sandbox = {
-      getState: () => Object.assign({}, self.state || {}),
+      getState: () => Object.assign({}, self.state || {}) as S,
       dispatch: (...args: any[]) => self.dispatch.apply(self, args)
     };
 
