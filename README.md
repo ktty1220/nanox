@@ -318,7 +318,7 @@ const actions = {
     .
     .
 
-  // overwirte '__error' action
+  // overwrite '__error' action
   __error(err) {
     // show alert dialog instead of console.error
     window.alert(err.message);
