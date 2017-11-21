@@ -15,10 +15,10 @@
     "react-micro-container": "^1.2.0"
   },
   "devDependencies": {
-    "@types/react": "^16.0.19",
+    "@types/react": "^16.0.25",
     "babel-preset-es2015": "^6.24.1",
     "jest": "^21.2.1",
-    "react": "^16.0.0",
+    "react": "^16.1.1",
     "typescript": "^2.6.1"
   },
   "babel": {
