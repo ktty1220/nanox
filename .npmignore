@@ -3,3 +3,4 @@ coverage/
 example/
 demo.gif
 yarn.lock
+*~
