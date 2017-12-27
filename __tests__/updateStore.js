@@ -14,9 +14,18 @@ describe('updateStore', () => {
 
   test('null => noop', () => {
     expect.assertions(1);
-    const expected = null;
-    nanox.updateStore(expected);
+    nanox.updateStore();
     expect(nanox.setState.mock.calls).toHaveLength(0);
+  });
+
+  test('promise(null) => noop', () => {
+    expect.assertions(1);
+    const p = Promise.resolve();
+    nanox.updateStore(p);
+    p.then((result) => {
+      expect(nanox.setState.mock.calls).toHaveLength(0);
+    });
+    return p;
   });
 
   const invalidParams = {

@@ -39,6 +39,11 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     return true;
   }
 
+  // clone object
+  private clone<OBJ>(obj: OBJ): OBJ {
+    return Object.assign({}, obj) as OBJ;
+  }
+
   // override react-micro-container's dispatch method
   protected dispatch(action: string, ...args: any[]): void {
     // check action name typo
@@ -72,7 +77,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     } else {
       // object -> setState
       const pickState = result as Pick<S, keyof S>;
-      if (this.onSetState(pickState) === false) {
+      if (this.onSetState(this.clone(pickState)) === false) {
         this.log('setState() was blocked at onSetState()', 'warn');
         return;
       }
@@ -101,7 +106,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     // sandbox
     const self = this;
     this.sandbox = {
-      getState: () => Object.assign({}, self.state || {}) as S,
+      getState: () => this.clone(self.state || {}) as S,
       dispatch: (...args: any[]) => self.dispatch.apply(self, args)
     };
 

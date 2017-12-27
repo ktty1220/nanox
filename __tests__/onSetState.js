@@ -19,23 +19,29 @@ class NanoxOnSetState extends Nanox {
 }
 
 class NanoxOnSetStateTrue extends NanoxOnSetState {
-  onSetState(state) { return true; }
+  onSetState(nextState) { return true; }
 }
 
 class NanoxOnSetStateFalse extends NanoxOnSetState {
-  onSetState(state) { return false; }
+  onSetState(nextState) { return false; }
 }
 
 class NanoxOnSetStateNull extends NanoxOnSetState {
-  onSetState(state) { return null; }
+  onSetState(nextState) { return null; }
 }
 
 class NanoxOnSetStateVoid extends NanoxOnSetState {
-  onSetState(state) { }
+  onSetState(nextState) { }
+}
+
+class NanoxOnSetStateChangeState extends NanoxOnSetState {
+  onSetState(nextState) {
+    nextState.count = 100;
+  }
 }
 
 describe('dispatch', () => {
-  test('return true => setState() is executed', () => {
+  test('return true => setState is executed', () => {
     expect.assertions(1);
     const nanox = new NanoxOnSetStateTrue({});
     const expected = {
@@ -46,7 +52,7 @@ describe('dispatch', () => {
     expect(nanox.setState.mock.calls).toEqual([ [ expected ] ]);
   });
 
-  test('return false => setState() is blocked', () => {
+  test('return false => setState is blocked', () => {
     expect.assertions(2);
     const nanox = new NanoxOnSetStateFalse({});
     const expected = {
@@ -58,7 +64,7 @@ describe('dispatch', () => {
     expect(nanox.state).toEqual(expected);
   });
 
-  test('return null => setState() is executed', () => {
+  test('return null => setState is executed', () => {
     expect.assertions(1);
     const nanox = new NanoxOnSetStateNull({});
     const expected = {
@@ -69,9 +75,20 @@ describe('dispatch', () => {
     expect(nanox.setState.mock.calls).toEqual([ [ expected ] ]);
   });
 
-  test('return void => setState() is executed', () => {
+  test('return void => setState is executed', () => {
     expect.assertions(1);
     const nanox = new NanoxOnSetStateVoid({});
+    const expected = {
+      count: 1
+    };
+    nanox.setState = jest.fn();
+    nanox.dispatch('increment');
+    expect(nanox.setState.mock.calls).toEqual([ [ expected ] ]);
+  });
+
+  test('change state => no effect for container', () => {
+    expect.assertions(1);
+    const nanox = new NanoxOnSetStateChangeState({});
     const expected = {
       count: 1
     };

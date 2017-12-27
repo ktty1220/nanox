@@ -49,9 +49,7 @@ describe('dispatch', () => {
   test('return false => action is blocked', () => {
     expect.assertions(2);
     const nanox = new NanoxOnDispatchFalse({});
-    const expected = {
-      count: 0
-    };
+    const expected = nanox.clone(nanox.state);
     nanox.setState = jest.fn();
     nanox.dispatch('increment');
     expect(nanox.setState.mock.calls).toHaveLength(0);

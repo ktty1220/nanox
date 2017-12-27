@@ -353,6 +353,10 @@ class FooContainer extends Nanox {
     .
 ```
 
+`...args` is copy of arguments of action.
+
+Changing this value directly has no effect for aciton.
+
 #### onSetState
 
 ```js
@@ -370,6 +374,10 @@ class FooContainer extends Nanox {
     .
     .
 ```
+
+`nextState` is copy of Nanox container's state.
+
+Changing this value directly has no effect for Nanox container.
 
 ## License
 
