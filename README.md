@@ -109,7 +109,11 @@ export default class BarComponent extends React.Component {
 }
 ```
 
+## DEMO
+
 ![Example Demo](demo.gif)
+
+[CodeSandbox](https://codesandbox.io/s/pwz0prn3yq)
 
 ## Example
 
@@ -134,7 +138,7 @@ const actions = {
 
 ### If Action returns values, that must be partial state object or Promise Object.
 
-#### Bad: return number
+#### :x: return number
 
 ```js
 const actions = {
@@ -144,7 +148,7 @@ const actions = {
 }
 ```
 
-#### Good: return partial state
+#### :heavy_check_mark: return partial state
 
 ```js
 const actions = {
@@ -156,7 +160,7 @@ const actions = {
 }
 ```
 
-#### Good: return Promise Object (resolve partial state)
+#### :heavy_check_mark: return Promise Object (resolve partial state)
 
 ```js
 const actions = {
@@ -170,7 +174,7 @@ const actions = {
 }
 ```
 
-#### Good: return nothing (No effect for Nanox container)
+#### :heavy_check_mark: return nothing (No effect for Nanox container)
 
 ```js
 const actions = {
@@ -324,6 +328,44 @@ const actions = {
     window.alert(err.message);
   }
 
+    .
+    .
+    .
+```
+
+### Hook methods
+
+#### onDispatch
+
+```js
+class FooContainer extends Nanox {
+    .
+    .
+    .
+  onDispatch(action, ...args) {
+    if ( ... ) {
+      // You can block execution of action by returning false at onDispatch()
+      return false;
+    }
+  }
+    .
+    .
+    .
+```
+
+#### onSetState
+
+```js
+class FooContainer extends Nanox {
+    .
+    .
+    .
+  onSetState(nextState) {
+    if ( ... ) {
+      // You can block applying action result to state by returning false at onSetState()
+      return false;
+    }
+  }
     .
     .
     .

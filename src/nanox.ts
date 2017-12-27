@@ -12,6 +12,7 @@ export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult
 export interface ActionMap<S> {
   [ name: string ]: Action<S>;
 }
+type LogLevels = 'log' | 'info' | 'warn' | 'error';
 
 // class Nanox
 export default class Nanox<P, S> extends MicroContainer<P, S> {
@@ -23,11 +24,30 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     this.emitter = new EventEmitter2();
   }
 
+  // show log
+  protected log(message: string, level: LogLevels = 'log') {
+    console[level](message);
+  }
+
+  // setState hook
+  protected onSetState(_nextState: Pick<S, keyof S>): boolean {
+    return true;
+  }
+
+  // dispatch hook
+  protected onDispatch(_action: string, ..._args: any[]): boolean {
+    return true;
+  }
+
   // override react-micro-container's dispatch method
   protected dispatch(action: string, ...args: any[]): void {
     // check action name typo
     if (this.emitter.listeners(action).length === 0) {
       throw new Error(`event '${action}' is not registered`);
+    }
+    if (this.onDispatch(action, ...args) === false) {
+      this.log(`action: '${action}' was blocked at onDispatch()`, 'warn');
+      return;
     }
     super.dispatch.apply(this, [ action, ...args ]);
   }
@@ -51,7 +71,12 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
       result.then(recursive).catch((err) => this.dispatch('__error', err));
     } else {
       // object -> setState
-      this.setState(result as Pick<S, keyof S>);
+      const pickState = result as Pick<S, keyof S>;
+      if (this.onSetState(pickState) === false) {
+        this.log('setState() was blocked at onSetState()', 'warn');
+        return;
+      }
+      this.setState(pickState);
     }
   }
 
@@ -83,7 +108,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     const actions = Object.assign({
       // default error action
       __error: ((err: Error) => {
-        console.error(err.message);
+        this.log(err.message, 'error');
       }) as Action<S>
     }, actionMap);
 
