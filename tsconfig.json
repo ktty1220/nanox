@@ -6,6 +6,7 @@
     "jsx": "react",
     "sourceMap": true,
     "outDir": "lib",
+    "declaration": false,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

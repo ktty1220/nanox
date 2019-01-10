@@ -2,43 +2,43 @@
   "name": "nanox",
   "version": "0.1.2",
   "description": "Minimal JavaScript framework for React inspired by Flux",
+  "keywords": [
+    "flux",
+    "framework",
+    "react"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "ktty1220",
+    "email": "ktty1220@gmail.com"
+  },
   "main": "./lib/nanox.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ktty1220/nanox.git"
+  },
   "scripts": {
     "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest",
     "cov": "jest --coverage",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "jest",
+    "watch": "tsc -w"
   },
   "dependencies": {
-    "eventemitter2": "^5.0.0",
+    "eventemitter2": "^5.0.1",
     "react-micro-container": "^1.2.0"
   },
   "devDependencies": {
-    "@types/react": "^16.0.31",
+    "@types/react": "^16.7.18",
     "babel-preset-es2015": "^6.24.1",
-    "jest": "^22.0.4",
-    "react": "^16.2.0",
-    "typescript": "^2.6.2"
+    "jest": "^23.6.0",
+    "react": "^16.7.0",
+    "typescript": "^3.2.2"
   },
   "babel": {
     "presets": [
       "es2015"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ktty1220/nanox.git"
-  },
-  "keywords": [
-    "react",
-    "framework",
-    "flux"
-  ],
-  "author": {
-    "name": "ktty1220",
-    "email": "ktty1220@gmail.com"
-  },
-  "license": "MIT",
   "readmeFilename": "README.md"
 }

@@ -3,20 +3,20 @@ import MicroContainer, { Handler, Handlers } from 'react-micro-container';
 import { EventEmitter2 } from 'eventemitter2';
 
 // define actions
-export type ActionResult<S> = Partial<S> | Promise<Partial<S>>;
-interface ActionSandbox<S> {
+export type ActionResult<S> = void | Partial<S> | Promise<Partial<S>>;
+export interface ActionSandbox<S> {
   getState(): S;
   dispatch(action: string, ...args: any[]): void;
 }
-export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S> | void;
+export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
   [ name: string ]: Action<S>;
 }
-type LogLevels = 'log' | 'info' | 'warn' | 'error';
+export type LogLevels = 'log' | 'info' | 'warn' | 'error';
 
 // class Nanox
 export default class Nanox<P, S> extends MicroContainer<P, S> {
-  protected sandbox: ActionSandbox<S>;
+  protected sandbox!: ActionSandbox<S>;
 
   constructor(props: P) {
     super(props);
@@ -107,7 +107,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     const self = this;
     this.sandbox = {
       getState: () => this.clone(self.state || {}) as S,
-      dispatch: (...args: any[]) => self.dispatch.apply(self, args)
+      dispatch: (...args: [string, ...any[]]) => self.dispatch.apply(self, args)
     };
 
     const actions = Object.assign({
