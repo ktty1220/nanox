@@ -383,4 +383,4 @@ Changing this value directly has no effect for Nanox container.
 
 [MIT](http://www.opensource.org/licenses/mit-license)
 
-&copy; 2017 [ktty1220](mailto:ktty1220@gmail.com)
+&copy; 2019 [ktty1220](mailto:ktty1220@gmail.com)
