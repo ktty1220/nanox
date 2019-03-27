@@ -2,7 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <title>Nanox demo</title>
+    <title>Nanox example</title>
   </head>
   <body>
     <div id="app"></div>
@@ -53,8 +53,8 @@
        */
       const CounterComponent = () => (
         <Consumer>
-          {/* receive dispatch function via context */}
           {({ dispatch, state }) => (
+            // receive dispatch function via context
             <div>
               <div>{state.count}</div>
               {/* call dispatch function with action name and arguments */}
@@ -77,8 +77,8 @@
         }
 
         render() {
-          // pass this.dispatch to child component via context
           return (
+            // pass this.dispatch to child component via context
             <Provider value={{ dispatch: this.dispatch, state: this.state }}>
               <CounterComponent />
             </Provider>
@@ -88,6 +88,7 @@
 
       // mount Nanox container to DOM
       ReactDOM.render(
+        // set actions to container
         <MainContainer actions={actions} />,
         document.getElementById('app')
       );
