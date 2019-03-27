@@ -1,4 +1,6 @@
 __tests__/
 demo.gif
+webpack.config.js
+tsconfig.json
 yarn.lock
 *~
