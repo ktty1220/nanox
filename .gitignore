@@ -1,3 +1,6 @@
+.buildifchanged/
 node_modules/
 coverage/
 dist/
+src/*.js
+src/*.js.map
