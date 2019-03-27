@@ -1,5 +1,5 @@
 /*eslint-env jest, es6*/
-import Nanox from '../dist/nanox';
+import Nanox from '../src/nanox';
 
 class NanoxOnDispatch extends Nanox {
   constructor(props) {

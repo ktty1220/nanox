@@ -1,4 +1,5 @@
 __tests__/
+coverage/
 demo.gif
 webpack.config.js
 tsconfig.json
