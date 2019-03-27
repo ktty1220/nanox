@@ -25,7 +25,6 @@ module.exports = {
     globalObject: 'this'
   },
   externals: {
-    events: 'var {EventEmitter:function(){}}',
     react: 'React'
   },
   devtool: 'source-map'

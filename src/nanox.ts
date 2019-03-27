@@ -1,6 +1,5 @@
 /// <reference path="react-micro-container.d.ts" />
 import MicroContainer, { Handler, Handlers } from 'react-micro-container';
-import { EventEmitter2 } from 'eventemitter2';
 
 // define actions
 export type ActionResult<S> = void | Partial<S> | Promise<Partial<S>>;
@@ -26,8 +25,6 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
 
   constructor(props: P) {
     super(props);
-    // use eventemitter2 instead of events
-    this.emitter = new EventEmitter2();
   }
 
   // show log
