@@ -15,6 +15,9 @@ export interface ActionMap<S> {
 export type LogLevels = 'log' | 'info' | 'warn' | 'error';
 
 // define base props
+export interface ContainerProps<S> {
+  actions?: ActionMap<S>;
+}
 export interface ComponentProps {
   dispatch(action: string, ...args: any[]): void;
 }
@@ -23,8 +26,11 @@ export interface ComponentProps {
 export default class Nanox<P, S> extends MicroContainer<P, S> {
   protected sandbox!: ActionSandbox<S>;
 
-  constructor(props: P) {
+  constructor(props: P & ContainerProps<S>) {
     super(props);
+    if (typeof props.actions !== 'undefined') {
+      this.registerActions(props.actions);
+    }
   }
 
   // show log

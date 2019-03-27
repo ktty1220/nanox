@@ -21,7 +21,6 @@
   "scripts": {
     "build": "webpack",
     "prepare": "npm run build",
-    "cov": "jest --coverage",
     "test": "jest",
     "watch": "webpack -w"
   },
@@ -50,11 +49,7 @@
   "jest": {
     "verbose": false,
     "testEnvironment": "node",
-    "testMatch": null,
-    "testRegex": "/__tests__/.+\\.jsx?$",
-    "collectCoverageFrom": [
-      "src/**/*.{ts,tsx}"
-    ]
+    "testRegex": "/__tests__/.+\\.js?$"
   },
   "readmeFilename": "README.md"
 }

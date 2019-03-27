@@ -6,8 +6,8 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src="https://unpkg.com/react@15/dist/react.min.js"></script>
-    <script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.min.js"></script>
     <script src="./dist/nanox.js"></script>
     <script type="text/babel">
@@ -44,17 +44,26 @@
       };
 
       /**
+       * Create Context
+       */
+      const { Provider, Consumer } = React.createContext();
+
+      /**
        * Create Child Component
        */
-      // receive dispatch function via props
-      const CounterComponent = ({ dispatch, count }) => (
-        <div>
-          <div>{count}</div>
-          {/* call dispatch function with action name and arguments */}
-          <button onClick={() => dispatch('increment', 1)}>+1</button>
-          <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
-          <button onClick={() => dispatch('increment', 100)}>+100</button>
-        </div>
+      const CounterComponent = () => (
+        <Consumer>
+          {/* receive dispatch function via context */}
+          {({ dispatch, state }) => (
+            <div>
+              <div>{state.count}</div>
+              {/* call dispatch function with action name and arguments */}
+              <button onClick={() => dispatch('increment', 1)}>+1</button>
+              <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
+              <button onClick={() => dispatch('increment', 100)}>+100</button>
+            </div>
+          )}
+        </Consumer>
       );
 
       /**
@@ -67,19 +76,21 @@
           this.state = { count: 0 };
         }
 
-        componentDidMount() {
-          // register actions
-          this.registerActions(actions);
-        }
-
         render() {
-          // pass this.dispatch to child component props
-          return <CounterComponent dispatch={this.dispatch} {...this.state} />;
+          // pass this.dispatch to child component via context
+          return (
+            <Provider value={{ dispatch: this.dispatch, state: this.state }}>
+              <CounterComponent />
+            </Provider>
+          );
         }
       }
 
       // mount Nanox container to DOM
-      ReactDOM.render(<MainContainer />, document.getElementById('app'));
+      ReactDOM.render(
+        <MainContainer actions={actions} />,
+        document.getElementById('app')
+      );
     </script>
   </body>
 </html>

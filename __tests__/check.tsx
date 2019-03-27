@@ -4,6 +4,7 @@ import * as ReactDOM from 'react-dom';
 import Nanox, {
   ActionResult,
   ActionMap,
+  ContainerProps,
   ComponentProps
 } from '../';
 
@@ -44,7 +45,7 @@ const CounterComponent: React.FC<CounterProps> = ({ dispatch, count }) => (
   </div>
 );
 
-interface MainProps {
+interface MainProps extends ContainerProps<State> {
   name: string;
 }
 class MainContainer extends Nanox<MainProps, State> {
@@ -53,13 +54,12 @@ class MainContainer extends Nanox<MainProps, State> {
     this.state = { count: 0 };
   }
 
-  public componentDidMount() {
-    this.registerActions(actions);
-  }
-
   public render() {
     return <CounterComponent dispatch={this.dispatch} {...this.state} />;
   }
 }
 
-ReactDOM.render(<MainContainer name="app" />, document.getElementById('app'));
+ReactDOM.render(
+  <MainContainer name="app" actions={actions} />,
+  document.getElementById('app')
+);
