@@ -59,13 +59,13 @@ import ReactDOM from 'react-dom';
 import Nanox from 'nanox';
 
 // import child component
-import BarComponent from './bar';
+import CounterComponent from './counter';
 
 // import actions
 import actions from './actions';
 
 // create container (inherit Nanox)
-class FooContainer extends Nanox {
+class MainContainer extends Nanox {
   constructor(props) {
     super(props);
     this.state = { count: 0 };
@@ -78,12 +78,12 @@ class FooContainer extends Nanox {
 
   render() {
     // pass this.dispatch to child component props
-    return <BarComponent dispatch={this.dispatch} {...this.state} />;
+    return <CounterComponent dispatch={this.dispatch} {...this.state} />;
   }
 }
 
 // mount Nanox container to DOM
-ReactDOM.render(<FooContainer />, document.getElementById('foo'));
+ReactDOM.render(<MainContainer />, document.getElementById('foo'));
 ```
 
 ### STEP 3 - Create Child Component
@@ -92,7 +92,7 @@ ReactDOM.render(<FooContainer />, document.getElementById('foo'));
 import * as React from 'react';
 
 // create stateless component
-export default class BarComponent extends React.Component {
+export default class CounterComponent extends React.Component {
   render() {
     // receive dispatch function via props
     const { dispatch, count } = this.props;
@@ -197,7 +197,7 @@ register actions to Nanox container.
 This method shoud be called on `componentDidMount`.
 
 ```js
-class FooContainer extends Nanox {
+class MainContainer extends Nanox {
     .
     .
     .
@@ -235,7 +235,7 @@ You can not use those methods directly.
 You can get current Nanox container's `state` by calling `this.getState()`.
 
 ```js
-class FooContainer extends Nanox {
+class MainContainer extends Nanox {
   constructor(props) {
     super(props);
     this.state = {
@@ -338,7 +338,7 @@ const actions = {
 #### onDispatch
 
 ```js
-class FooContainer extends Nanox {
+class MainContainer extends Nanox {
     .
     .
     .
@@ -360,7 +360,7 @@ Changing this value directly has no effect for aciton.
 #### onSetState
 
 ```js
-class FooContainer extends Nanox {
+class MainContainer extends Nanox {
     .
     .
     .

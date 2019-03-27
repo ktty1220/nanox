@@ -1,5 +1,5 @@
 /*eslint-env jest, es6*/
-import Nanox from '../lib/nanox';
+import Nanox from '../dist/nanox';
 
 describe('registerActions', () => {
   let nanox = null;
@@ -96,7 +96,7 @@ describe('registerActions', () => {
     nanox.registerActions({
       foo() {
         this.dispatch('bar', 'baz');
-        expect(Object.keys(this)).toEqual([ 'getState', 'dispatch' ]);
+        expect(Object.keys(this)).toEqual([ 'getState', 'dispatch', 'update' ]);
         expect(this.getState()).toEqual(nanox.state);
         expect(nanox.setState.mock.calls).toEqual([ [{ title: 'baz' }] ]);
         done();

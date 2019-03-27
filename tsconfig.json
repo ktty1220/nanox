@@ -4,8 +4,7 @@
     "target": "es5",
     "lib": ["es2015", "es2017", "dom"],
     "jsx": "react",
-    "sourceMap": true,
-    "outDir": "lib",
+    "sourceMap": false,
     "declaration": false,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
@@ -27,7 +26,7 @@
     "importHelpers": false,
     "removeComments": true
   },
-  "exclude": [
-    "node_modules"
+  "include": [
+    "src"
   ]
 }

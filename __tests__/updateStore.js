@@ -1,5 +1,5 @@
 /*eslint-env jest, es6*/
-import Nanox from '../lib/nanox';
+import Nanox from '../dist/nanox';
 
 describe('updateStore', () => {
   let nanox = null;

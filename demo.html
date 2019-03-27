@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>Nanox demo</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://unpkg.com/react@15/dist/react.min.js"></script>
+    <script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.min.js"></script>
+    <script src="./dist/nanox.js"></script>
+    <script type="text/babel">
+      /**
+       * Create actions
+       */
+      const actions = {
+        // action name is 'increment'
+        increment(count) {
+          // get current state
+          const currentState = this.getState();
+
+          // return partial state that you want to update
+          return this.update({
+            count: currentState.count + count
+          });
+        },
+
+        // action name is 'decrement'
+        decrement(count) {
+          // you can return Promise Object that resolve partial state
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              // get current state
+              const currentState = this.getState();
+
+              // resolve partial state that you want to update
+              resolve({
+                count: currentState.count - count
+              });
+            }, 1000);
+          });
+        }
+      };
+
+      /**
+       * Create Child Component
+       */
+      // receive dispatch function via props
+      const CounterComponent = ({ dispatch, count }) => (
+        <div>
+          <div>{count}</div>
+          {/* call dispatch function with action name and arguments */}
+          <button onClick={() => dispatch('increment', 1)}>+1</button>
+          <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
+          <button onClick={() => dispatch('increment', 100)}>+100</button>
+        </div>
+      );
+
+      /**
+       * Create Nanox Container
+       */
+      // create container (inherit Nanox)
+      class MainContainer extends Nanox {
+        constructor(props) {
+          super(props);
+          this.state = { count: 0 };
+        }
+
+        componentDidMount() {
+          // register actions
+          this.registerActions(actions);
+        }
+
+        render() {
+          // pass this.dispatch to child component props
+          return <CounterComponent dispatch={this.dispatch} {...this.state} />;
+        }
+      }
+
+      // mount Nanox container to DOM
+      ReactDOM.render(<MainContainer />, document.getElementById('app'));
+    </script>
+  </body>
+</html>

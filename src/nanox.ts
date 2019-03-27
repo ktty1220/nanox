@@ -7,12 +7,18 @@ export type ActionResult<S> = void | Partial<S> | Promise<Partial<S>>;
 export interface ActionSandbox<S> {
   getState(): S;
   dispatch(action: string, ...args: any[]): void;
+  update(methods: { [K in keyof S]: any }): ActionResult<S>;
 }
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
   [ name: string ]: Action<S>;
 }
 export type LogLevels = 'log' | 'info' | 'warn' | 'error';
+
+// define base props
+export interface ComponentProps {
+  dispatch(action: string, ...args: any[]): void;
+}
 
 // class Nanox
 export default class Nanox<P, S> extends MicroContainer<P, S> {
@@ -105,17 +111,24 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
 
     // sandbox
     const self = this;
-    this.sandbox = {
+    this.sandbox = Object.freeze({
       getState: () => this.clone(self.state || {}) as S,
-      dispatch: (...args: [string, ...any[]]) => self.dispatch.apply(self, args)
-    };
+      dispatch: (...args) => self.dispatch.apply(self, args),
+      update: (methods) => {
+        // TODO
+        console.info(self.sandbox.getState());
+        return methods;
+      }
+    } as ActionSandbox<S>);
 
-    const actions = Object.assign({
-      // default error action
-      __error: ((err: Error) => {
-        this.log(err.message, 'error');
-      }) as Action<S>
-    }, actionMap);
+    const actions = Object.freeze(
+      Object.assign({
+        // default error action
+        __error: ((err: Error) => {
+          this.log(err.message, 'error');
+        }) as Action<S>
+      }, actionMap)
+    );
 
     // action to handler
     const handlers: Handlers = {};
