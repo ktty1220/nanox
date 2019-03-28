@@ -17,12 +17,9 @@
       const actions = {
         // action name is 'increment'
         increment(count) {
-          // get current state
-          const currentState = this.getState();
-
-          // return partial state that you want to update
+          // return update command
           return this.update({
-            count: currentState.count + count
+            count: { $increment: count }
           });
         },
 
@@ -46,25 +43,25 @@
       /**
        * Create Context
        */
-      const { Provider, Consumer } = React.createContext();
+      const Context = React.createContext();
+      const { Provider } = Context;
 
       /**
        * Create Child Component
        */
-      const CounterComponent = () => (
-        <Consumer>
-          {({ dispatch, state }) => (
-            // receive dispatch function via context
-            <div>
-              <div>{state.count}</div>
-              {/* call dispatch function with action name and arguments */}
-              <button onClick={() => dispatch('increment', 1)}>+1</button>
-              <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
-              <button onClick={() => dispatch('increment', 100)}>+100</button>
-            </div>
-          )}
-        </Consumer>
-      );
+      const CounterComponent = () => {
+        // receive dispatch function via context
+        const { dispatch, state } = React.useContext(Context);
+        return (
+          <div>
+            <div>{state.count}</div>
+            {/* call dispatch function with action name and arguments */}
+            <button onClick={() => dispatch('increment', 1)}>+1</button>
+            <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
+            <button onClick={() => dispatch('increment', 100)}>+100</button>
+          </div>
+        );
+      };
 
       /**
        * Create Nanox Container
@@ -76,11 +73,26 @@
           this.state = { count: 0 };
         }
 
+        onDispatch(action, ...args) {
+          console.info('action dispatched', { action, args });
+          //return false;
+        }
+
+        onSetState(data, type) {
+          console.info('state will update', { data, type });
+          //return false;
+        }
+
+        componentWillUpdate(props, state) {
+          console.info('new state', state);
+        }
+
         render() {
           return (
             // pass this.dispatch to child component via context
             <Provider value={{ dispatch: this.dispatch, state: this.state }}>
               <CounterComponent />
+              <p>Look at the logs displayed on the Developer Tools console.</p>
             </Provider>
           );
         }

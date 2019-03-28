@@ -14,10 +14,8 @@ interface State {
 
 const actions: ActionMap<State> = {
   increment(count): ActionResult<State> {
-    const currentState = this.getState();
-    // TODO
     return this.update({
-      count: currentState.count + count
+      count: { $increment: count }
     });
   },
 

@@ -1,18 +1,28 @@
 /// <reference path="react-micro-container.d.ts" />
 import MicroContainer, { Handler, Handlers } from 'react-micro-container';
+import update, { extend } from 'immutability-helper';
+
+// custom update commands
+extend('$increment', (value: number, target: number) => (target || 0) + value);
+extend('$decrement', (value: number, target: number) => (target || 0) - value);
 
 // define actions
-export type ActionResult<S> = void | Partial<S> | Promise<Partial<S>>;
-export interface ActionSandbox<S> {
+type UpdateCommands<S> = { [K in keyof S]: any };
+class LazyUpdater<S> {
+  constructor(public commands: UpdateCommands<Partial<S>>) {}
+}
+export type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | LazyUpdater<S>;
+type NextState<S> = Pick<S, keyof S> | UpdateCommands<Partial<S>>;
+interface ActionSandbox<S> {
   getState(): S;
   dispatch(action: string, ...args: any[]): void;
-  update(methods: { [K in keyof S]: any }): ActionResult<S>;
+  update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
 }
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
   [ name: string ]: Action<S>;
 }
-export type LogLevels = 'log' | 'info' | 'warn' | 'error';
+type LogLevels = 'log' | 'info' | 'warn' | 'error';
 
 // define base props
 export interface ContainerProps<S> {
@@ -39,7 +49,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
   }
 
   // setState hook
-  protected onSetState(_nextState: Pick<S, keyof S>): boolean {
+  protected onSetState(_nextState: NextState<S>, _type: string): boolean {
     return true;
   }
 
@@ -84,13 +94,20 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
       // Promise -> resolve -> updateStore
       result.then(recursive).catch((err) => this.dispatch('__error', err));
     } else {
-      // object -> setState
-      const pickState = result as Pick<S, keyof S>;
-      if (this.onSetState(this.clone(pickState)) === false) {
+      const isUpdate = (result instanceof LazyUpdater);
+      // object or LazyUpdater -> setState
+      const nextState = (isUpdate)
+        ? (result as LazyUpdater<S>).commands
+        : result as Partial<S>;
+      if (this.onSetState(this.clone(nextState), (isUpdate) ? 'update' : 'state') === false) {
         this.log('setState() was blocked at onSetState()', 'warn');
         return;
       }
-      this.setState(pickState);
+      this.setState(
+        (isUpdate)
+        ? (currentState) => update(currentState, nextState as any)
+        : nextState
+      );
     }
   }
 
@@ -117,11 +134,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     this.sandbox = Object.freeze({
       getState: () => this.clone(self.state || {}) as S,
       dispatch: (...args) => self.dispatch.apply(self, args),
-      update: (methods) => {
-        // TODO
-        console.info(self.sandbox.getState());
-        return methods;
-      }
+      update: (commands) => new LazyUpdater(commands)
     } as ActionSandbox<S>);
 
     const actions = Object.freeze(

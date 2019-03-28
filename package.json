@@ -23,29 +23,25 @@
     "watch": "webpack -w",
     "dev": "webpack-dev-server",
     "prepare": "npm run build",
-    "before-test": "build-if-changed",
+    "before-test": "tsc",
+    "after-test": "rimraf src/nanox{.js.map,.js}",
     "exec-test": "jest",
     "exec-cov": "jest --coverage",
-    "test": "run-s before-test exec-test",
-    "cov": "run-s before-test exec-cov",
-    "cleanup-test": "rimraf src/nanox{.js.map,.js} .buildifchanged"
+    "test": "run-s before-test exec-test after-test",
+    "cov": "run-s before-test exec-cov after-test"
   },
-  "pre-commit": [
-    "cleanup-test"
-  ],
   "dependencies": {
+    "immutability-helper": "^3.0.0",
     "react-micro-container": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
-    "@types/react": "^16.8.8",
+    "@types/react": "^16.8.10",
     "@types/react-dom": "^16.8.3",
     "babel-jest": "^24.5.0",
-    "build-if-changed": "^0.1.2",
     "jest": "^24.5.0",
     "npm-run-all": "^4.1.5",
-    "pre-commit": "^1.2.2",
     "react": "^16.8.5",
     "react-dom": "^16.8.5",
     "rimraf": "^2.6.3",

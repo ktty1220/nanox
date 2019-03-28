@@ -27,5 +27,6 @@ module.exports = {
   externals: {
     react: 'React'
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
+  cache: true
 };

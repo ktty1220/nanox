@@ -19,23 +19,23 @@ class NanoxOnSetState extends Nanox {
 }
 
 class NanoxOnSetStateTrue extends NanoxOnSetState {
-  onSetState(nextState) { return true; }
+  onSetState(nextState, type) { return true; }
 }
 
 class NanoxOnSetStateFalse extends NanoxOnSetState {
-  onSetState(nextState) { return false; }
+  onSetState(nextState, type) { return false; }
 }
 
 class NanoxOnSetStateNull extends NanoxOnSetState {
-  onSetState(nextState) { return null; }
+  onSetState(nextState, type) { return null; }
 }
 
 class NanoxOnSetStateVoid extends NanoxOnSetState {
-  onSetState(nextState) { }
+  onSetState(nextState, type) { }
 }
 
 class NanoxOnSetStateChangeState extends NanoxOnSetState {
-  onSetState(nextState) {
+  onSetState(nextState, type) {
     nextState.count = 100;
   }
 }
