@@ -4,6 +4,7 @@ import {
   memo,
   createContext,
   useContext,
+  useState,
   useCallback
 } from 'react';
 import * as ReactDOM from 'react-dom';
@@ -47,16 +48,19 @@ interface CounterProps {
 }
 const CounterComponent: FC<CounterProps> = ({ count }) => {
   const actions = useContext(Context);
+  const [ disabled, setDisabled ] = useState(false);
 
   const increment1 = useCallback(() => actions.increment(1), []);
   const decrement1 = useCallback(() => actions.decrement(1), []);
   const increment100 = useCallback(() => actions.increment(100), []);
   const step = useCallback(() => {
+    setDisabled(true);
     actions.increment(1)
     .then(() => actions.decrement(1))
     .then(() => actions.decrement(1))
     .then(() => new Promise((resolve) => setTimeout(resolve, Math.random() * 3000)))
     .then(() => actions.increment(1))
+    .then(() => setDisabled(false))
     .catch(console.error);
   }, []);
 

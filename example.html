@@ -18,7 +18,7 @@
     <script src="./dist/nanox.js"></script>
     <script type="text/babel">
       'use strict';
-      const { memo, createContext, useContext, useCallback } = React;
+      const { memo, createContext, useContext, useState, useCallback } = React;
 
       /**
        * create actions
@@ -57,27 +57,30 @@
       const CounterComponent = memo(({ count }) => {
         // receive actions via context
         const actions = useContext(Context);
+        const [ disabled, setDisabled ] = useState(false);
 
         // create click handler
         const increment1 = useCallback(() => actions.increment(1), []);
         const decrement1 = useCallback(() => actions.decrement(1), []);
         const increment100 = useCallback(() => actions.increment(100), []);
         const step = useCallback(() => {
+          setDisabled(true);
           actions.increment(1)
           .then(() => actions.decrement(1))
           .then(() => actions.decrement(1))
           .then(() => new Promise((resolve) => setTimeout(resolve, Math.random() * 3000)))
           .then(() => actions.increment(1))
+          .then(() => setDisabled(false))
           .catch(console.error);
         }, []);
 
         return (
           <div>
             <p>{count}</p>
-            <button onClick={increment1}>+1</button>
-            <button onClick={decrement1}>-1(delay 1s)</button>
-            <button onClick={increment100}>+100</button>
-            <button onClick={step}>step</button>
+            <button disabled={disabled} onClick={increment1}>+1</button>
+            <button disabled={disabled} onClick={decrement1}>-1(delay 1s)</button>
+            <button disabled={disabled} onClick={increment100}>+100</button>
+            <button disabled={disabled} onClick={step}>step</button>
           </div>
         );
       });
