@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8">
     <title>Nanox example</title>
+    <style>
+      body {
+        width: 640px;
+        margin: 0 auto;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
@@ -59,7 +65,7 @@
 
         return (
           <div>
-            <div>{count}</div>
+            <p>{count}</p>
             <button onClick={increment1}>+1</button>
             <button onClick={decrement1}>-1(delay 1s)</button>
             <button onClick={increment100}>+100</button>

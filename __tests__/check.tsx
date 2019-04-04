@@ -54,7 +54,7 @@ const CounterComponent: FC<CounterProps> = ({ count }) => {
 
   return (
     <div>
-      <div>{count}</div>
+      <p>{count}</p>
       <button onClick={increment1}>+1</button>
       <button onClick={decrement1}>-1(delay 1s)</button>
       <button onClick={increment100}>+100</button>

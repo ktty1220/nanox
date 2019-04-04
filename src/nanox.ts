@@ -21,12 +21,7 @@ export interface ActionMap<S> {
 export type NanoxAction = (...args: any[]) => void;
 export type NanoxActionMap<S, A> = { [ K in keyof (A & ActionMap<S>) ]: NanoxAction };
 
-// TODO want to be strict
-interface NanoxActionMapNoStrict {
-  [ name: string ]: NanoxAction;
-}
 interface ActionSandbox<S> {
-  actions: NanoxActionMapNoStrict;
   state: S;
   update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
 }
@@ -99,7 +94,6 @@ export default class Nanox<P, S, A> extends Component<P, S> {
     return (...args: any[]) => {
       // sandbox
       const sandbox: ActionSandbox<S> = {
-        actions: self.actions,
         get state() {
           return self.clone(self.state || {}) as S;
         },
