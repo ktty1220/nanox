@@ -51,6 +51,14 @@ const CounterComponent: FC<CounterProps> = ({ count }) => {
   const increment1 = useCallback(() => actions.increment(1), []);
   const decrement1 = useCallback(() => actions.decrement(1), []);
   const increment100 = useCallback(() => actions.increment(100), []);
+  const step = useCallback(() => {
+    actions.increment(1)
+    .then(() => actions.decrement(1))
+    .then(() => actions.decrement(1))
+    .then(() => new Promise((resolve) => setTimeout(resolve, Math.random() * 3000)))
+    .then(() => actions.increment(1))
+    .catch(console.error);
+  }, []);
 
   return (
     <div>
@@ -58,6 +66,7 @@ const CounterComponent: FC<CounterProps> = ({ count }) => {
       <button onClick={increment1}>+1</button>
       <button onClick={decrement1}>-1(delay 1s)</button>
       <button onClick={increment100}>+100</button>
+      <button onClick={step}>step</button>
     </div>
   );
 };

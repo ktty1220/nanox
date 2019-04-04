@@ -18,7 +18,7 @@ export interface ActionMap<S> {
   __error?: Action<S>;
 }
 
-export type NanoxAction = (...args: any[]) => void;
+export type NanoxAction = (...args: any[]) => Promise<void>;
 export type NanoxActionMap<S, A> = { [ K in keyof (A & ActionMap<S>) ]: NanoxAction };
 
 interface ActionSandbox<S> {
@@ -54,9 +54,7 @@ export default class Nanox<P, S, A> extends Component<P, S> {
   }
 
   // apply action result to state
-  private updateStore(result: ActionResult<S>): void {
-    const recursive = this.updateStore.bind(this);
-
+  private updateStore(result: ActionResult<S>, done: () => void): void {
     // null or undefined -> skip
     if (result == null) return;
 
@@ -69,7 +67,8 @@ export default class Nanox<P, S, A> extends Component<P, S> {
 
     if (result instanceof Promise) {
       // Promise -> resolve -> updateStore
-      result.then(recursive).catch(this.actions.__error);
+      result.then((data) => this.updateStore(data, done))
+      .catch(this.actions.__error);
     } else {
       const isUpdate = (result instanceof LazyUpdater);
       // object or LazyUpdater -> setState
@@ -83,7 +82,8 @@ export default class Nanox<P, S, A> extends Component<P, S> {
       this.setState(
         (isUpdate)
         ? (currentState) => update(currentState, nextState as any)
-        : nextState
+        : nextState,
+        done
       );
     }
   }
@@ -91,22 +91,24 @@ export default class Nanox<P, S, A> extends Component<P, S> {
   // create function that execute action and update state
   private createAction(func: Action<S>, inErrorHandler: boolean): NanoxAction {
     const self = this;
-    return (...args: any[]) => {
-      // sandbox
-      const sandbox: ActionSandbox<S> = {
-        get state() {
-          return self.clone(self.state || {}) as S;
-        },
-        update: (commands) => new LazyUpdater(commands)
-      };
+    return (...args: any[]) => (
+      new Promise<void>((resolve, _reject) => {
+        // sandbox
+        const sandbox: ActionSandbox<S> = {
+          get state() {
+            return self.clone(self.state || {}) as S;
+          },
+          update: (commands) => new LazyUpdater(commands)
+        };
 
-      try {
-        this.updateStore(func.apply(Object.freeze(sandbox), args));
-      } catch (e) {
-        if (inErrorHandler) throw e;
-        this.actions.__error!(e);
-      }
-    };
+        try {
+          this.updateStore(func.apply(Object.freeze(sandbox), args), resolve);
+        } catch (e) {
+          if (inErrorHandler) throw e;
+          this.actions.__error!(e);
+        }
+      })
+    );
   }
 
   // subscribe all actions
