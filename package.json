@@ -31,8 +31,7 @@
     "cov": "run-s before-test exec-cov after-test"
   },
   "dependencies": {
-    "immutability-helper": "^3.0.0",
-    "react-micro-container": "^1.2.0"
+    "immutability-helper": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",

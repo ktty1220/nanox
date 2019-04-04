@@ -1,63 +1,89 @@
 /*tslint:disable: no-invalid-this variable-name*/
-import * as React from 'react';
+import {
+  FC,
+  memo,
+  createContext,
+  useContext,
+  useCallback
+} from 'react';
 import * as ReactDOM from 'react-dom';
 import Nanox, {
-  ActionResult,
+  Action,
   ActionMap,
-  ContainerProps,
-  ComponentProps
+  NanoxActionMap
 } from '../';
 
 interface State {
   count: number;
 }
 
-const actions: ActionMap<State> = {
-  increment(count): ActionResult<State> {
+interface MyActions extends ActionMap<State> {
+  increment: Action<State>;
+  decrement: Action<State>;
+}
+
+const myActions: MyActions = {
+  increment(count: number) {
     return this.update({
       count: { $increment: count }
     });
   },
 
-  decrement(count): ActionResult<State> {
+  decrement(count: number) {
     return new Promise((resolve, _reject) => {
       setTimeout(() => {
-        const currentState = this.getState();
         resolve({
-          count: currentState.count - count
+          count: this.state.count - count
         });
       }, 1000);
     });
   }
 };
 
-interface CounterProps extends ComponentProps {
+const Context = createContext<NanoxActionMap<State, MyActions>>(null);
+
+interface CounterProps {
   count: number;
 }
-const CounterComponent: React.FC<CounterProps> = ({ dispatch, count }) => (
-  <div>
-    <div>{count}</div>
-    <button onClick={() => dispatch('increment', 1)}>+1</button>
-    <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
-    <button onClick={() => dispatch('increment', 100)}>+100</button>
-  </div>
-);
+const CounterComponent: FC<CounterProps> = ({ count }) => {
+  const actions = useContext(Context);
 
-interface MainProps extends ContainerProps<State> {
-  name: string;
+  const increment1 = useCallback(() => actions.increment(1), []);
+  const decrement1 = useCallback(() => actions.decrement(1), []);
+  const increment100 = useCallback(() => actions.increment(100), []);
+
+  return (
+    <div>
+      <div>{count}</div>
+      <button onClick={increment1}>+1</button>
+      <button onClick={decrement1}>-1(delay 1s)</button>
+      <button onClick={increment100}>+100</button>
+    </div>
+  );
+};
+
+interface MainProps {
+  actions: MyActions;
+  title: string;
 }
-class MainContainer extends Nanox<MainProps, State> {
-  constructor(props: MainProps) {
+class MainContainer extends Nanox<MainProps, State, MyActions> {
+  constructor(props) {
     super(props);
     this.state = { count: 0 };
   }
 
   public render() {
-    return <CounterComponent dispatch={this.dispatch} {...this.state} />;
+    return (
+      <Context.Provider value={this.actions}>
+        <h2>{this.props.title}</h2>
+        <CounterComponent count={this.state.count} />
+        <p>Look at the logs displayed on the Developer Tools console.</p>
+      </Context.Provider>
+    );
   }
 }
 
 ReactDOM.render(
-  <MainContainer name="app" actions={actions} />,
+  <MainContainer title="Nanox simple example" actions={myActions} />,
   document.getElementById('app')
 );

@@ -1,5 +1,4 @@
-/// <reference path="react-micro-container.d.ts" />
-import MicroContainer, { Handler, Handlers } from 'react-micro-container';
+import { Component } from 'react';
 import update, { extend } from 'immutability-helper';
 
 // custom update commands
@@ -11,50 +10,41 @@ type UpdateCommands<S> = { [K in keyof S]: any };
 class LazyUpdater<S> {
   constructor(public commands: UpdateCommands<Partial<S>>) {}
 }
-export type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | LazyUpdater<S>;
 type NextState<S> = Pick<S, keyof S> | UpdateCommands<Partial<S>>;
-interface ActionSandbox<S> {
-  getState(): S;
-  dispatch(action: string, ...args: any[]): void;
-  update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
-}
+
+type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | LazyUpdater<S>;
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
-  [ name: string ]: Action<S>;
+  __error?: Action<S>;
 }
-type LogLevels = 'log' | 'info' | 'warn' | 'error';
 
-// define base props
-export interface ContainerProps<S> {
-  actions?: ActionMap<S>;
+export type NanoxAction = (...args: any[]) => void;
+export type NanoxActionMap<S, A> = { [ K in keyof (A & ActionMap<S>) ]: NanoxAction };
+
+// TODO want to be strict
+interface NanoxActionMapNoStrict {
+  [ name: string ]: NanoxAction;
 }
-export interface ComponentProps {
-  dispatch(action: string, ...args: any[]): void;
+interface ActionSandbox<S> {
+  actions: NanoxActionMapNoStrict;
+  state: S;
+  update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
 }
 
 // class Nanox
-export default class Nanox<P, S> extends MicroContainer<P, S> {
-  protected sandbox!: ActionSandbox<S>;
+export default class Nanox<P, S, A> extends Component<P, S> {
+  public actions!: NanoxActionMap<S, A>;
 
-  constructor(props: P & ContainerProps<S>) {
+  constructor(props: P & { actions: A }) {
     super(props);
-    if (typeof props.actions !== 'undefined') {
-      this.registerActions(props.actions);
+    if (! ('actions' in props)) {
+      throw new Error('requires the action props');
     }
-  }
-
-  // show log
-  protected log(message: string, level: LogLevels = 'log') {
-    console[level](message);
+    this.registerActions(props.actions);
   }
 
   // setState hook
   protected onSetState(_nextState: NextState<S>, _type: string): boolean {
-    return true;
-  }
-
-  // dispatch hook
-  protected onDispatch(_action: string, ..._args: any[]): boolean {
     return true;
   }
 
@@ -63,17 +53,9 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     return Object.assign({}, obj) as OBJ;
   }
 
-  // override react-micro-container's dispatch method
-  protected dispatch(action: string, ...args: any[]): void {
-    // check action name typo
-    if (this.emitter.listeners(action).length === 0) {
-      throw new Error(`event '${action}' is not registered`);
-    }
-    if (this.onDispatch(action, ...args) === false) {
-      this.log(`action: '${action}' was blocked at onDispatch()`, 'warn');
-      return;
-    }
-    super.dispatch.apply(this, [ action, ...args ]);
+  // ver 0.1.x
+  protected dispatch(_action: string, ..._args: any[]): never {
+    throw new Error('Nanox version 0.2.0 has many breaking changes from version 0.1.x.\nsee https://github.com/ktty1220/nanox');
   }
 
   // apply action result to state
@@ -86,13 +68,13 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
     // not object -> error
     const type = (Object.prototype.toString.call(result) === '[object Array]') ? 'array' : typeof result;
     if (type !== 'object') {
-      this.dispatch('__error', new Error(`invalid action result: ${result} is ${type}`));
+      this.actions.__error!(new Error(`invalid action result: ${result} is ${type}`));
       return;
     }
 
     if (result instanceof Promise) {
       // Promise -> resolve -> updateStore
-      result.then(recursive).catch((err) => this.dispatch('__error', err));
+      result.then(recursive).catch(this.actions.__error);
     } else {
       const isUpdate = (result instanceof LazyUpdater);
       // object or LazyUpdater -> setState
@@ -100,7 +82,7 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
         ? (result as LazyUpdater<S>).commands
         : result as Partial<S>;
       if (this.onSetState(this.clone(nextState), (isUpdate) ? 'update' : 'state') === false) {
-        this.log('setState() was blocked at onSetState()', 'warn');
+        console.warn('setState() was blocked at onSetState()');
         return;
       }
       this.setState(
@@ -112,48 +94,45 @@ export default class Nanox<P, S> extends MicroContainer<P, S> {
   }
 
   // create function that execute action and update state
-  private createAction(func: Action<S>, inErrorHandler: boolean): Handler {
+  private createAction(func: Action<S>, inErrorHandler: boolean): NanoxAction {
+    const self = this;
     return (...args: any[]) => {
+      // sandbox
+      const sandbox: ActionSandbox<S> = {
+        actions: self.actions,
+        get state() {
+          return self.clone(self.state || {}) as S;
+        },
+        update: (commands) => new LazyUpdater(commands)
+      };
+
       try {
-        this.updateStore(func.apply(this.sandbox, args));
+        this.updateStore(func.apply(Object.freeze(sandbox), args));
       } catch (e) {
         if (inErrorHandler) throw e;
-        this.dispatch('__error', e);
+        this.actions.__error!(e);
       }
     };
   }
 
   // subscribe all actions
-  protected registerActions(actionMap: ActionMap<S>): void {
-    if (this.emitter.eventNames().length > 0) {
+  private registerActions(actionMap: ActionMap<S>): void {
+    if (this.actions != null) {
       throw new Error('actions are already registered');
     }
-
-    // sandbox
-    const self = this;
-    this.sandbox = Object.freeze({
-      getState: () => this.clone(self.state || {}) as S,
-      dispatch: (...args) => self.dispatch.apply(self, args),
-      update: (commands) => new LazyUpdater(commands)
-    } as ActionSandbox<S>);
 
     const actions = Object.freeze(
       Object.assign({
         // default error action
-        __error: ((err: Error) => {
-          this.log(err.message, 'error');
-        }) as Action<S>
+        __error: (console.error) as Action<S>
       }, actionMap)
     );
 
-    // action to handler
-    const handlers: Handlers = {};
     const actionNames = Object.keys(actions);
-    this.emitter.setMaxListeners(actionNames.length);
+    const nanoxActions = {};
     actionNames.forEach((evt) => {
-      handlers[evt] = this.createAction(actions[evt], (evt === '__error'));
+      nanoxActions[evt] = this.createAction(actions[evt], (evt === '__error'));
     });
-
-    this.subscribe(handlers);
+    this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, A>;
   }
 }

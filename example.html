@@ -6,17 +6,18 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.min.js"></script>
     <script src="./dist/nanox.js"></script>
     <script type="text/babel">
+      'use strict';
       const { memo, createContext, useContext, useCallback } = React;
 
       /**
-       * Create actions
+       * create actions
        */
-      const actions = {
+      const myActions = {
         // action name is 'increment'
         increment(count) {
           // return update command
@@ -30,12 +31,9 @@
           // you can return Promise Object that resolve partial state
           return new Promise((resolve, reject) => {
             setTimeout(() => {
-              // get current state
-              const currentState = this.getState();
-
               // resolve partial state that you want to update
               resolve({
-                count: currentState.count - count
+                count: this.state.count - count
               });
             }, 1000);
           });
@@ -43,21 +41,21 @@
       };
 
       /**
-       * Create Context
+       * create context
        */
-      const Context = createContext();
+      const Context = createContext(null);
 
       /**
-       * Create Child Component
+       * create child component
        */
       const CounterComponent = memo(({ count }) => {
-        // receive dispatch function via context
-        const dispatch = useContext(Context);
+        // receive actions via context
+        const actions = useContext(Context);
 
-        // create dispatch function with action name and arguments
-        const increment1 = useCallback(() => dispatch('increment', 1), []);
-        const decrement1 = useCallback(() => dispatch('decrement', 1), []);
-        const increment100 = useCallback(() => dispatch('increment', 100), []);
+        // create click handler
+        const increment1 = useCallback(() => actions.increment(1), []);
+        const decrement1 = useCallback(() => actions.decrement(1), []);
+        const increment100 = useCallback(() => actions.increment(100), []);
 
         return (
           <div>
@@ -70,18 +68,12 @@
       });
 
       /**
-       * Create Nanox Container
+       * create Nanox container(class component inherit Nanox)
        */
-      // create container (inherit Nanox)
       class MainContainer extends Nanox {
         constructor(props) {
           super(props);
           this.state = { count: 0 };
-        }
-
-        onDispatch(action, ...args) {
-          console.info('action dispatched', { action, args });
-          //return false;
         }
 
         onSetState(data, type) {
@@ -95,8 +87,9 @@
 
         render() {
           return (
-            // pass this.dispatch to child component via context
-            <Context.Provider value={this.dispatch}>
+            // pass this.actions to child component via context
+            <Context.Provider value={this.actions}>
+              <h2>{this.props.title}</h2>
               <CounterComponent count={this.state.count} />
               <p>Look at the logs displayed on the Developer Tools console.</p>
             </Context.Provider>
@@ -104,10 +97,12 @@
         }
       }
 
-      // mount Nanox container to DOM
+      /**
+       * mount Nanox container to DOM
+       */
       ReactDOM.render(
         // set actions to container
-        <MainContainer actions={actions} />,
+        <MainContainer title="Nanox simple example" actions={myActions} />,
         document.getElementById('app')
       );
     </script>
