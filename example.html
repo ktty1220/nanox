@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.min.js"></script>
     <script src="./dist/nanox.js"></script>
     <script type="text/babel">
+      const { memo, createContext, useContext, useCallback } = React;
+
       /**
        * Create actions
        */
@@ -43,25 +45,29 @@
       /**
        * Create Context
        */
-      const Context = React.createContext();
-      const { Provider } = Context;
+      const Context = createContext();
 
       /**
        * Create Child Component
        */
-      const CounterComponent = () => {
+      const CounterComponent = memo(({ count }) => {
         // receive dispatch function via context
-        const { dispatch, state } = React.useContext(Context);
+        const dispatch = useContext(Context);
+
+        // create dispatch function with action name and arguments
+        const increment1 = useCallback(() => dispatch('increment', 1), []);
+        const decrement1 = useCallback(() => dispatch('decrement', 1), []);
+        const increment100 = useCallback(() => dispatch('increment', 100), []);
+
         return (
           <div>
-            <div>{state.count}</div>
-            {/* call dispatch function with action name and arguments */}
-            <button onClick={() => dispatch('increment', 1)}>+1</button>
-            <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
-            <button onClick={() => dispatch('increment', 100)}>+100</button>
+            <div>{count}</div>
+            <button onClick={increment1}>+1</button>
+            <button onClick={decrement1}>-1(delay 1s)</button>
+            <button onClick={increment100}>+100</button>
           </div>
         );
-      };
+      });
 
       /**
        * Create Nanox Container
@@ -90,10 +96,10 @@
         render() {
           return (
             // pass this.dispatch to child component via context
-            <Provider value={{ dispatch: this.dispatch, state: this.state }}>
-              <CounterComponent />
+            <Context.Provider value={this.dispatch}>
+              <CounterComponent count={this.state.count} />
               <p>Look at the logs displayed on the Developer Tools console.</p>
-            </Provider>
+            </Context.Provider>
           );
         }
       }
