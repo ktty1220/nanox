@@ -11,12 +11,17 @@ import * as ReactDOM from 'react-dom';
 import Nanox, {
   Action,
   ActionMap,
+  CommandMap,
   NanoxActionMap
 } from '../';
 
 interface State {
   count: number;
 }
+
+const myCommands: CommandMap = {
+  $increment: (value: number, target: number) => (target || 0) + value
+};
 
 interface MyActions extends ActionMap<State> {
   increment: Action<State>;
@@ -46,7 +51,7 @@ const Context = createContext<NanoxActionMap<State, MyActions>>(null);
 interface CounterProps {
   count: number;
 }
-const CounterComponent: FC<CounterProps> = ({ count }) => {
+const CounterComponent: FC<CounterProps> = memo(({ count }) => {
   const actions = useContext(Context);
   const [ disabled, setDisabled ] = useState(false);
 
@@ -73,10 +78,11 @@ const CounterComponent: FC<CounterProps> = ({ count }) => {
       <button onClick={step}>step</button>
     </div>
   );
-};
+});
 
 interface MainProps {
   actions: MyActions;
+  commands: CommandMap;
   title: string;
 }
 class MainContainer extends Nanox<MainProps, State, MyActions> {
@@ -97,6 +103,10 @@ class MainContainer extends Nanox<MainProps, State, MyActions> {
 }
 
 ReactDOM.render(
-  <MainContainer title="Nanox simple example" actions={myActions} />,
+  <MainContainer
+    title="Nanox simple example"
+    actions={myActions}
+    commands={myCommands}
+  />,
   document.getElementById('app')
 );

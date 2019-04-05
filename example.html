@@ -21,6 +21,14 @@
       const { memo, createContext, useContext, useState, useCallback } = React;
 
       /**
+       * create custom commands for update
+       * @see https://github.com/kolodny/immutability-helper#adding-your-own-commands
+       */
+      const myCommands: CommandMap = {
+        $increment: (value: number, target: number) => (target || 0) + value
+      };
+
+      /**
        * create actions
        */
       const myActions = {
@@ -120,7 +128,11 @@
        */
       ReactDOM.render(
         // set actions to container
-        <MainContainer title="Nanox simple example" actions={myActions} />,
+        <MainContainer
+          title="Nanox simple example"
+          actions={myActions}
+          commands={myCommands}
+        />,
         document.getElementById('app')
       );
     </script>

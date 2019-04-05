@@ -1,21 +1,21 @@
 import { Component } from 'react';
 import update, { extend } from 'immutability-helper';
 
-// custom update commands
-extend('$increment', (value: number, target: number) => (target || 0) + value);
-extend('$decrement', (value: number, target: number) => (target || 0) - value);
-
 // define actions
 type UpdateCommands<S> = { [K in keyof S]: any };
 class LazyUpdater<S> {
   constructor(public commands: UpdateCommands<Partial<S>>) {}
 }
-type NextState<S> = Pick<S, keyof S> | UpdateCommands<Partial<S>>;
+type NextState<S> = Partial<S> | UpdateCommands<Partial<S>>;
 
 type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | LazyUpdater<S>;
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
   __error?: Action<S>;
+}
+
+export interface CommandMap {
+  [ command: string ]: (...args: any) => any;
 }
 
 export type NanoxAction = (...args: any[]) => Promise<void>;
@@ -30,12 +30,13 @@ interface ActionSandbox<S> {
 export default class Nanox<P, S, A> extends Component<P, S> {
   public actions!: NanoxActionMap<S, A>;
 
-  constructor(props: P & { actions: A }) {
+  constructor(props: P & { actions: A, commands?: CommandMap }) {
     super(props);
     if (! ('actions' in props)) {
       throw new Error('requires the action props');
     }
     this.registerActions(props.actions);
+    this.registerCommands(props.commands);
   }
 
   // setState hook
@@ -67,8 +68,7 @@ export default class Nanox<P, S, A> extends Component<P, S> {
 
     if (result instanceof Promise) {
       // Promise -> resolve -> updateStore
-      result.then((data) => this.updateStore(data, done))
-      .catch(this.actions.__error);
+      result.then((data) => this.updateStore(data, done)).catch(this.actions.__error);
     } else {
       const isUpdate = (result instanceof LazyUpdater);
       // object or LazyUpdater -> setState
@@ -111,7 +111,7 @@ export default class Nanox<P, S, A> extends Component<P, S> {
     );
   }
 
-  // subscribe all actions
+  // convert actions props to nanox actions
   private registerActions(actionMap: ActionMap<S>): void {
     if (this.actions != null) {
       throw new Error('actions are already registered');
@@ -120,7 +120,7 @@ export default class Nanox<P, S, A> extends Component<P, S> {
     const actions = Object.freeze(
       Object.assign({
         // default error action
-        __error: (console.error) as Action<S>
+        __error: console.error as Action<S>
       }, actionMap)
     );
 
@@ -130,5 +130,11 @@ export default class Nanox<P, S, A> extends Component<P, S> {
       nanoxActions[evt] = this.createAction(actions[evt], (evt === '__error'));
     });
     this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, A>;
+  }
+
+  // register custom commands for sandbox.update
+  private registerCommands(commandMap?: CommandMap): void {
+    if (commandMap == null) return;
+    Object.keys(commandMap).forEach((cmd) => extend(cmd, commandMap[cmd]));
   }
 }
