@@ -5,6 +5,7 @@ import * as ts from 'typescript';
 describe('type error check', () => {
   test('compile check.tsx', () => {
     const program = ts.createProgram([ path.join(__dirname, 'check.tsx') ], {
+      target: 'es5',
       jsx: 'react',
       strict: true,
       allowSyntheticDefaultImports: true,

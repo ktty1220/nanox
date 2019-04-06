@@ -46,13 +46,13 @@ const myActions: MyActions = {
   }
 };
 
-const Context = createContext<NanoxActionMap<State, MyActions>>(null);
+const Context = createContext<NanoxActionMap<State, MyActions> | null>(null);
 
 interface CounterProps {
   count: number;
 }
 const CounterComponent: FC<CounterProps> = memo(({ count }) => {
-  const actions = useContext(Context);
+  const actions = useContext(Context)!;
   const [ disabled, setDisabled ] = useState(false);
 
   const increment1 = useCallback(() => actions.increment(1), []);
@@ -72,10 +72,10 @@ const CounterComponent: FC<CounterProps> = memo(({ count }) => {
   return (
     <div>
       <p>{count}</p>
-      <button onClick={increment1}>+1</button>
-      <button onClick={decrement1}>-1(delay 1s)</button>
-      <button onClick={increment100}>+100</button>
-      <button onClick={step}>step</button>
+      <button disabled={disabled} onClick={increment1}>+1</button>
+      <button disabled={disabled} onClick={decrement1}>-1(delay 1s)</button>
+      <button disabled={disabled} onClick={increment100}>+100</button>
+      <button disabled={disabled} onClick={step}>step</button>
     </div>
   );
 });
@@ -86,7 +86,7 @@ interface MainProps {
   title: string;
 }
 class MainContainer extends Nanox<MainProps, State, MyActions> {
-  constructor(props) {
+  constructor(props: MainProps) {
     super(props);
     this.state = { count: 0 };
   }
