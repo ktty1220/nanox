@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import update, { extend } from 'immutability-helper';
+import { Context } from 'immutability-helper';
 
 // define actions
 type UpdateCommands<S> = { [K in keyof S]: any };
@@ -35,6 +35,7 @@ type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
 // class Nanox
 export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S> {
   public actions!: NanoxActionMap<S, PropType<P, 'actions'>>;
+  private updateContext!: Context;
 
   constructor(props: P) {
     super(props);
@@ -52,7 +53,7 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
 
   // clone object
   private clone<OBJ>(obj: OBJ): OBJ {
-    return Object.assign({}, obj) as OBJ;
+    return { ...obj };
   }
 
   // ver 0.1.x
@@ -87,7 +88,7 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
       }
       this.setState(
         (isUpdate)
-        ? (currentState) => update(currentState, nextState as any)
+        ? (currentState) => this.updateContext.update(currentState, nextState as any)
         : nextState,
         done
       );
@@ -124,23 +125,25 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
     }
 
     const actions = Object.freeze(
-      Object.assign({
-        // default error action
-        __error: console.error as Action<S>
-      }, actionMap)
+      {
+        __error: console.error as Action<S>, // default error action
+        ...actionMap
+      }
     );
 
-    const actionNames = Object.keys(actions);
     const nanoxActions = {};
-    actionNames.forEach((evt) => {
-      nanoxActions[evt] = this.createAction(actions[evt], (evt === '__error'));
-    });
+    for (const [ evt, func ] of Object.entries(actions)) {
+      nanoxActions[evt] = this.createAction(func, (evt === '__error'));
+    }
     this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, PropType<P, 'actions'>>;
   }
 
   // register custom commands for sandbox.update
   private registerCommands(commandMap?: CommandMap): void {
+    this.updateContext = new Context();
     if (commandMap == null) return;
-    Object.keys(commandMap).forEach((cmd) => extend(cmd, commandMap[cmd]));
+    for (const [ cmd, func] of Object.entries(commandMap)) {
+      this.updateContext.extend(cmd, func);
+    }
   }
 }

@@ -340,7 +340,9 @@ class MainContainer extends Nanox {
     .
     .
     .
-  onSetState(nextState) {
+  onSetState(data, type) {
+    // data = partial state or update command that will apply to Nanox state
+    // type = 'state' or 'update'
     if ( ... ) {
       // You can block applying action result to state by returning false at onSetState()
       return false;
