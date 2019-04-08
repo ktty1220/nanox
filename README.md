@@ -175,10 +175,10 @@ class MainContainer extends Nanox {
 const myActions = {
   increment(count) {
     // get current state
-    const currentState = this.state(); // => {
-                                       //    count: 0,
-                                       //    waiting: false
-                                       // }
+    const currentState = this.state; // => {
+                                     //    count: 0,
+                                     //    waiting: false
+                                     // }
 
       .
       .
