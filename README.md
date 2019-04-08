@@ -1,8 +1,6 @@
-# Nanox - Minimal JavaScript framework for React inspired by Flux.
+# Nanox
 
-This framework is based on [react-micro-container](https://www.npmjs.com/package/react-micro-container), and added some extension.
-
-For basic specs, see [here](https://www.npmjs.com/package/react-micro-container).
+Minimal javaScript framework for React inspired by Flux.
 
 ## Install
 
@@ -12,18 +10,15 @@ $ npm install nanox
 
 ## Usage
 
-### STEP 1 - Create Actions
+### STEP 1 - Create actions
 
 ```js
-const actions = {
+const myActions = {
   // action name is 'increment'
   increment(count) {
-    // get current state
-    const currentState = this.getState();
-
     // return partial state that you want to update
     return {
-      count: currentState.count + count
+      count: this.state.count + count
     };
   },
 
@@ -32,12 +27,9 @@ const actions = {
     // you can return Promise Object that resolve partial state
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // get current state
-        const currentState = this.getState();
-
         // resolve partial state that you want to update
         resolve({
-          count: currentState.count - count
+          count: this.state.count - count
         });
       }, 1000);
     });
@@ -45,10 +37,29 @@ const actions = {
 };
 
 // export
-export default actions;
+export default myActions;
 ```
 
-### STEP 2 - Create Nanox Container
+### STEP 2 - Create child component
+
+```js
+// create stateless component(receive actions via props)
+const CounterComponent = ({ actions, count }) => {
+  // call actions that created at STEP 1
+  return (
+    <div>
+      <div>{count}</div>
+      <button onClick={() => actions.increment(1)}>+1</button>
+      <button onClick={() => actions.decrement(1)}>-1(delay 1s)</button>
+      <button onClick={() => actions.increment(100)}>+100</button>
+    </div>
+  );
+};
+
+export default CounterComponent;
+```
+
+### STEP 3 - Create Nanox container
 
 ```js
 // import React
@@ -62,7 +73,7 @@ import Nanox from 'nanox';
 import CounterComponent from './counter';
 
 // import actions
-import actions from './actions';
+import myActions from './actions';
 
 // create container (inherit Nanox)
 class MainContainer extends Nanox {
@@ -71,168 +82,80 @@ class MainContainer extends Nanox {
     this.state = { count: 0 };
   }
 
-  componentDidMount() {
-    // register actions that created at STEP 1
-    this.registerActions(actions);
-  }
-
   render() {
-    // pass this.dispatch to child component props
-    return <CounterComponent dispatch={this.dispatch} {...this.state} />;
+    // pass this.actions to child component props
+    return <CounterComponent actions={this.actions} count{...this.state} />;
   }
 }
 
 // mount Nanox container to DOM
-ReactDOM.render(<MainContainer />, document.getElementById('foo'));
+ReactDOM.render(
+  // register actions that created at STEP 1
+  <MainContainer actions={myActions} />,
+  document.getElementById('app')
+);
 ```
 
-### STEP 3 - Create Child Component
-
-```js
-import * as React from 'react';
-
-// create stateless component
-export default class CounterComponent extends React.Component {
-  render() {
-    // receive dispatch function via props
-    const { dispatch, count } = this.props;
-    return (
-      <div>
-        <div>{count}</div>
-        {/* call dispatch function with action name and arguments that created at STEP 1 */}
-        <button onClick={() => dispatch('increment', 1)}>+1</button>
-        <button onClick={() => dispatch('decrement', 1)}>-1(delay 1s)</button>
-        <button onClick={() => dispatch('increment', 100)}>+100</button>
-      </div>
-    );
-  }
-}
-```
-
-## DEMO
+## Examples
 
 ![Example Demo](demo.gif)
 
-[CodeSandbox](https://codesandbox.io/s/pwz0prn3yq)
-
-## Example
-
-* [example of this repository](https://github.com/ktty1220/nanox/blob/master/example)
-* [Simple counter application project](https://github.com/ktty1220/nanox-example)
+* [DEMO](https://codesandbox.io/s/pwz0prn3yq)
+* [Example file of this repository](https://github.com/ktty1220/nanox/blob/master/example.html)
 
 ## Spec of Action
 
-### You can pass arguments after the action name when calling `dispatch()`.
-
-```js
-<button onClick={() => dispatch('fooAction', 1, 2, 3)}>foo</button>
-```
-
-```js
-const actions = {
-  fooAction(x, y, z) {
-    // x = 1, y = 2, z = 3
-  }
-}
-```
-
 ### If Action returns values, that must be partial state object or Promise Object.
 
-#### :x: return number
+#### :x: __Bad__: return number
 
 ```js
-const actions = {
-  fooAction(x, y, z) {
+const myActions = {
+  foo(x, y, z) {
     return x + y + z;
   }
-}
+};
 ```
 
-#### :heavy_check_mark: return partial state
+#### :heavy_check_mark: __Good__: return partial state
 
 ```js
-const actions = {
-  fooAction(x, y, z) {
+const myActions = {
+  foo(x, y, z) {
     return {
       count: x + y + z
     };
   }
-}
+};
 ```
 
-#### :heavy_check_mark: return Promise Object (resolve partial state)
+#### :heavy_check_mark: __Good__: return Promise Object (resolve partial state)
 
 ```js
-const actions = {
-  fooAction(x, y, z) {
+const myActions = {
+  foo(x, y, z) {
     return new Promise((resolve, reject) => {
       resolve({
         count: x + y + z
       });
     });
   }
-}
+};
 ```
 
-#### :heavy_check_mark: return nothing (No effect for Nanox container)
+#### :heavy_check_mark: __Good__: return nothing (no effect for Nanox container)
 
 ```js
-const actions = {
-  fooAction(x, y, z) {
+const myActions = {
+  foo(x, y, z) {
     console.log(x, y, z);
   }
 }
 ```
 
-## API
+### Get the current state in actions
 
-### Nanox Core API
-
-See [react-micro-container](https://www.npmjs.com/package/react-micro-container) for basic API.
-
-#### registerActions
-
-register actions to Nanox container.
-
-This method shoud be called on `componentDidMount`.
-
-```js
-class MainContainer extends Nanox {
-    .
-    .
-    .
-
-  componentDidMount() {
-    this.registerActions({
-      fooAction(arg1, arg2, arg3) {
-        // action method
-      },
-      barAction(...args) {
-        // action method
-      },
-
-        .
-        .
-        .
-    });
-  }
-
-    .
-    .
-    .
-```
-
-Other methods in Nanox are internal functions.
-
-You can not use those methods directly.
-
-### Action API
-
-`this` in the action implements bellow methods.
-
-#### getState
-
-You can get current Nanox container's `state` by calling `this.getState()`.
+The current state of the Nanox container can be get from `this.state`.
 
 ```js
 class MainContainer extends Nanox {
@@ -243,21 +166,19 @@ class MainContainer extends Nanox {
       waiting: false
     };
   }
-
     .
     .
     .
 ```
 
 ```js
-const actions = {
-  // action name is 'increment'
+const myActions = {
   increment(count) {
     // get current state
-    const currentState = this.getState(); // => {
-                                          //    count: 0,
-                                          //    waiting: false
-                                          // }
+    const currentState = this.state(); // => {
+                                       //    count: 0,
+                                       //    waiting: false
+                                       // }
 
       .
       .
@@ -266,49 +187,140 @@ const actions = {
 
 ##### Note
 
-`this.getState()` returns copy of Nanox container's state.
+`this.state` is copy of Nanox container's state.
 
 Changing this value directly has no effect for Nanox container.
 
-#### dispatch
+## Advanced Usage
 
-You can execute another action by calling `this.dispatch()`.
+### `update` function in actions
+
+You can return an update command like MongoDB's query language in actions using `this.update`.
 
 ```js
-const actions = {
-    .
-    .
-    .
-
-  decrement(count) {
-    // dispatch 'waiting' action in 'decrement' action
-    this.dispatch('waiting', true);
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve({
-          count: this.getState().count - count,
-          waiting: false
-        });
-      }, 1000);
-    });
-  },
-
-  waiting(state) {
-    // update 'waiting' state
-    return {
-      waiting: state
+class MainContainer extends Nanox {
+  constructor(props) {
+    super(props);
+    this.state = {
+      fruits: [ 'apple', 'banana', 'cherry' ]
     };
   }
-
     .
     .
     .
 ```
 
-## Advanced Usage
+```js
+const myActions = {
+  addUser(user) {
+    // call this.update function with command, and return functions result
+    return this.update({
+      fruits: {
+        $push: [ 'lemon' ] // => will be [ 'apple', 'banana', 'cherry', 'lemon' ]
+      }
+    });
+  },
+    .
+    .
+    .
+}
+```
 
-### Custom Error handler
+And you can add custom command for update function.
+
+```js
+ReactDOM.render(
+  // add $increment command on mounting Nanox container
+  <MainContainer
+    actions={myActions}
+    commands={
+      $increment: (value, target) => target + value
+    }
+  />,
+  document.getElementById('app')
+);
+```
+
+```js
+const myActions = {
+  increment() {
+    // use $increment command in actions
+    return this.update({
+      // value = 1, target = this.state.count
+      count: { $increment: 1 }
+    });
+  },
+    .
+    .
+    .
+};
+```
+
+[see more details](https://github.com/kolodny/immutability-helper#adding-your-own-commands).
+
+### Action chain
+
+Actions return Promise object, so you can invoke multiple actions synchronously.
+
+```js
+const myActions = {
+  // show/hide loading message
+  loading(show) {
+    return {
+      loading: show
+    };
+  },
+  // fetch user info from server
+  fetchUser(userName) {
+    return fetch(`/user?name=${userName}`)
+    .then((res) => res.json())
+    .then((userInfo) => {
+      return {
+        user: userInfo
+      }
+    });
+  },
+  // fetch friends info from server
+  fetchFriends() {
+    return fetch(`/friends?user=${this.state.user}`)
+    .then((res) => res.json())
+    .then((friendsInfo) => {
+      return {
+        friends: friendsInfo
+      }
+    });
+  },
+  // send message to friends
+  sendMessage(text) {
+    const data = new FormData();
+    data.append('from', this.state.user);
+    data.append('to', this.state.friends);
+    data.append('text', text);
+    fetch('/message', {
+      method: 'post',
+      body: data
+    });
+  },
+    .
+    .
+    .
+};
+```
+
+```js
+return (
+  <button onClick={
+    actions.loading(true)
+    .then(() => actions.fetchUser('foo'))
+    .then(() => actions.fetchFriends())
+    .then(() => actions.sendMessage('hello'))
+    .then(() => actions.loading(false))
+    .catch(console.error);
+  }>Say hello to friends</button>
+);
+```
+
+### Custom error handler
 
 Nanox implements default action `__error` that handling exception occurred in other actions.
 
@@ -317,7 +329,7 @@ Default `__error` action is a function that simply execute `console.error()`.
 You can overwrite `__error` action by implementing a same name function in your actions.
 
 ```js
-const actions = {
+const myActions = {
     .
     .
     .
@@ -333,31 +345,7 @@ const actions = {
     .
 ```
 
-### Hook methods
-
-#### onDispatch
-
-```js
-class MainContainer extends Nanox {
-    .
-    .
-    .
-  onDispatch(action, ...args) {
-    if ( ... ) {
-      // You can block execution of action by returning false at onDispatch()
-      return false;
-    }
-  }
-    .
-    .
-    .
-```
-
-`...args` is copy of arguments of action.
-
-Changing this value directly has no effect for aciton.
-
-#### onSetState
+### Hook method
 
 ```js
 class MainContainer extends Nanox {

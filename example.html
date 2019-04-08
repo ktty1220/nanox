@@ -24,8 +24,8 @@
        * create custom commands for update
        * @see https://github.com/kolodny/immutability-helper#adding-your-own-commands
        */
-      const myCommands: CommandMap = {
-        $increment: (value: number, target: number) => (target || 0) + value
+      const myCommands = {
+        $increment: (value, target) => (target || 0) + value
       };
 
       /**
