@@ -21,6 +21,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.38/browser.min.js"></script>
     <!-- nanox -->
     <script src="./dist/nanox.js"></script>
+    <!-- app -->
     <script type="text/babel">
       'use strict';
       const { memo, createContext, useContext, useState, useCallback } = React;
@@ -40,7 +41,6 @@
         // action name is 'increment'
         increment(count) {
           // return update command
-          console.info(this.update({ count: { $hoge: count }}));
           return this.update({
             count: { $increment: count }
           });

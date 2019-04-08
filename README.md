@@ -100,7 +100,6 @@ ReactDOM.render(
 
 ![Example Demo](demo.gif)
 
-* [DEMO](https://codesandbox.io/s/pwz0prn3yq)
 * [Example file of this repository](https://github.com/ktty1220/nanox/blob/master/example.html)
 
 ## Spec of Action
@@ -169,6 +168,7 @@ class MainContainer extends Nanox {
     .
     .
     .
+}
 ```
 
 ```js
@@ -179,10 +179,11 @@ const myActions = {
                                      //    count: 0,
                                      //    waiting: false
                                      // }
-
       .
       .
       .
+  }
+};
 ```
 
 ##### Note
@@ -193,9 +194,9 @@ Changing this value directly has no effect for Nanox container.
 
 ## Advanced Usage
 
-### `update` function in actions
+### `this.update()` function in actions
 
-You can return an update command like MongoDB's query language in actions using `this.update`.
+You can return an update command like MongoDB's query language in actions using `this.update()`.
 
 ```js
 class MainContainer extends Nanox {
@@ -204,16 +205,17 @@ class MainContainer extends Nanox {
     this.state = {
       fruits: [ 'apple', 'banana', 'cherry' ]
     };
-  }
+  },
     .
     .
     .
+};
 ```
 
 ```js
 const myActions = {
-  addUser(user) {
-    // call this.update function with command, and return functions result
+  addLemon(user) {
+    // call this.update() function with command, and return functions result
     return this.update({
       fruits: {
         $push: [ 'lemon' ] // => will be [ 'apple', 'banana', 'cherry', 'lemon' ]
@@ -223,10 +225,10 @@ const myActions = {
     .
     .
     .
-}
+};
 ```
 
-And you can add custom command for update function.
+And you can add custom command for `this.update()`.
 
 ```js
 ReactDOM.render(
@@ -258,7 +260,7 @@ const myActions = {
 
 [see more details](https://github.com/kolodny/immutability-helper#adding-your-own-commands).
 
-### Action chain
+### Action chaining
 
 Actions return Promise object, so you can invoke multiple actions synchronously.
 
@@ -327,10 +329,10 @@ const myActions = {
     // show alert dialog instead of console.error
     window.alert(err.message);
   }
-
     .
     .
     .
+};
 ```
 
 ### Hook method
@@ -351,11 +353,16 @@ class MainContainer extends Nanox {
     .
     .
     .
+};
 ```
 
 `nextState` is copy of Nanox container's state.
 
 Changing this value directly has no effect for Nanox container.
+
+### How to use from TypeScript
+
+see [here](https://github.com/ktty1220/nanox/blob/master/__tests__/check.tsx).
 
 ## License
 

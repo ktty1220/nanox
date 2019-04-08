@@ -1,38 +1,41 @@
 import { Component } from 'react';
 import { Context } from 'immutability-helper';
 
-// define actions
+// util
+type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
+
+// define update commands
+export interface CommandMap {
+  [ command: string ]: (...args: any) => any;
+}
 type UpdateCommands<S> = { [K in keyof S]: any };
 class LazyUpdater<S> {
   constructor(public commands: UpdateCommands<Partial<S>>) {}
 }
 type NextState<S> = Partial<S> | UpdateCommands<Partial<S>>;
 
+// define actions
 type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | LazyUpdater<S>;
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
   __error?: Action<S>;
 }
 
-export interface CommandMap {
-  [ command: string ]: (...args: any) => any;
-}
-
+// define Nanox actions
 export type NanoxAction = (...args: any[]) => Promise<void>;
 export type NanoxActionMap<S, A> = { [ K in keyof (A & ActionMap<S>) ]: NanoxAction };
 
+// define sandbox
 interface ActionSandbox<S> {
   state: S;
   update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
 }
 
+// class Nanox
 interface InternalProps<S> {
   actions: ActionMap<S>;
   commands?: CommandMap;
 }
-type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
-
-// class Nanox
 export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S> {
   public actions!: NanoxActionMap<S, PropType<P, 'actions'>>;
   private updateContext!: Context;
@@ -67,7 +70,7 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
     if (result == null) return;
 
     // not object -> error
-    const type = (Object.prototype.toString.call(result) === '[object Array]') ? 'array' : typeof result;
+    const type = (Array.isArray(result)) ? 'array' : typeof result;
     if (type !== 'object') {
       this.actions.__error!(new Error(`invalid action result: ${result} is ${type}`));
       return;
@@ -124,12 +127,10 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
       throw new Error('actions are already registered');
     }
 
-    const actions = Object.freeze(
-      {
-        __error: console.error as Action<S>, // default error action
-        ...actionMap
-      }
-    );
+    const actions = Object.freeze({
+      __error: console.error as Action<S>, // default error action
+      ...actionMap
+    });
 
     const nanoxActions = {};
     for (const [ evt, func ] of Object.entries(actions)) {
@@ -138,11 +139,11 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
     this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, PropType<P, 'actions'>>;
   }
 
-  // register custom commands for sandbox.update
+  // register custom commands for sandbox.update function
   private registerCommands(commandMap?: CommandMap): void {
     this.updateContext = new Context();
     if (commandMap == null) return;
-    for (const [ cmd, func] of Object.entries(commandMap)) {
+    for (const [ cmd, func ] of Object.entries(commandMap)) {
       this.updateContext.extend(cmd, func);
     }
   }
