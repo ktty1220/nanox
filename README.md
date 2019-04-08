@@ -283,7 +283,6 @@ const myActions = {
   // send message to friends
   sendMessage(text) {
     const data = new FormData();
-    data.append('from', this.state.user);
     data.append('to', this.state.friends);
     data.append('text', text);
     fetch('/message', {
