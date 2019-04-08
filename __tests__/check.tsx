@@ -24,7 +24,7 @@ const myCommands: CommandMap = {
   $increment: (value: number, target: number) => (target || 0) + value
 };
 
-// define Actions
+// define actions
 interface MyActions extends ActionMap<State> {
   increment: Action<State>;
   decrement: Action<State>;
@@ -88,7 +88,7 @@ const CounterComponent: FC<CounterProps> = memo(({ count }) => {
 interface MainProps {
   actions: MyActions;    // required
   commands: CommandMap;  // optional
-  title: string;         // other porps
+  title: string;         // other props
 }
 class MainContainer extends Nanox<MainProps, State> {
   constructor(props: MainProps) {
