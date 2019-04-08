@@ -270,19 +270,9 @@ const myActions = {
       loading: show
     };
   },
-  // fetch user info from server
-  fetchUser(userName) {
-    return fetch(`/user?name=${userName}`)
-    .then((res) => res.json())
-    .then((userInfo) => {
-      return {
-        user: userInfo
-      }
-    });
-  },
   // fetch friends info from server
   fetchFriends() {
-    return fetch(`/friends?user=${this.state.user}`)
+    return fetch('/friends')
     .then((res) => res.json())
     .then((friendsInfo) => {
       return {
@@ -311,12 +301,11 @@ const myActions = {
 return (
   <button onClick={
     actions.loading(true)
-    .then(() => actions.fetchUser('foo'))
     .then(() => actions.fetchFriends())
     .then(() => actions.sendMessage('hello'))
     .then(() => actions.loading(false))
     .catch(console.error);
-  }>Say hello to friends</button>
+  }>Say hello to my friends</button>
 );
 ```
 
