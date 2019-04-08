@@ -233,9 +233,9 @@ ReactDOM.render(
   // add $increment command on mounting Nanox container
   <MainContainer
     actions={myActions}
-    commands={
+    commands={{
       $increment: (value, target) => target + value
-    }
+    }}
   />,
   document.getElementById('app')
 );
