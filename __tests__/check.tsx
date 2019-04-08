@@ -8,6 +8,7 @@ import {
   useCallback
 } from 'react';
 import * as ReactDOM from 'react-dom';
+// import types from Nanox
 import Nanox, {
   Action,
   ActionMap,
@@ -23,11 +24,13 @@ const myCommands: CommandMap = {
   $increment: (value: number, target: number) => (target || 0) + value
 };
 
+// define Actions
 interface MyActions extends ActionMap<State> {
   increment: Action<State>;
   decrement: Action<State>;
 }
 
+// create actions of type MyActions
 const myActions: MyActions = {
   increment(count: number) {
     return this.update({
@@ -46,13 +49,14 @@ const myActions: MyActions = {
   }
 };
 
+// create context(pass the Nanox actions)
 const Context = createContext<NanoxActionMap<State, MyActions> | null>(null);
 
 interface CounterProps {
   count: number;
 }
 const CounterComponent: FC<CounterProps> = memo(({ count }) => {
-  const actions = useContext(Context)!;
+  const actions = useContext(Context)!;  // <- need "!"
   const [ disabled, setDisabled ] = useState(false);
 
   const increment1 = useCallback(() => actions.increment(1), []);
@@ -80,12 +84,13 @@ const CounterComponent: FC<CounterProps> = memo(({ count }) => {
   );
 });
 
+// define container props
 interface MainProps {
-  actions: MyActions;
-  commands: CommandMap;
-  title: string;
+  actions: MyActions;    // required
+  commands: CommandMap;  // optional
+  title: string;         // other porps
 }
-class MainContainer extends Nanox<MainProps, State, MyActions> {
+class MainContainer extends Nanox<MainProps, State> {
   constructor(props: MainProps) {
     super(props);
     this.state = { count: 0 };

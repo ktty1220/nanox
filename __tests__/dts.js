@@ -1,6 +1,22 @@
 /*eslint-env jest, es6*/
 import path from 'path';
 import * as ts from 'typescript';
+import { printReceived } from 'jest-matcher-utils';
+
+expect.extend({
+  hasError(received) {
+    if (received.length > 0) {
+      return {
+        message: () => printReceived(received.join('\n')),
+        pass: false
+      };
+    }
+    return {
+      message: () => 'No error occurred',
+      pass: true
+    };
+  }
+});
 
 describe('type error check', () => {
   test('compile check.tsx', () => {
@@ -27,12 +43,16 @@ describe('type error check', () => {
       if (d.file) {
         const { line, character } = d.file.getLineAndCharacterOfPosition(d.start);
         const message = ts.flattenDiagnosticMessageText(d.messageText, '\n');
-        errors.push(`${d.file.fileName} (${line + 1},${character + 1}): ${message}`);
+        errors.push([
+          path.basename(d.file.fileName),
+          `(${line + 1},${character + 1}):`,
+          message
+        ].join(' '));
       } else {
         errors.push(`${ts.flattenDiagnosticMessageText(d.messageText, '\n')}`);
       }
     });
 
-    expect(errors).toHaveLength(0);
+    expect(errors).hasError();
   });
 });

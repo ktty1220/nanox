@@ -26,11 +26,17 @@ interface ActionSandbox<S> {
   update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
 }
 
-// class Nanox
-export default class Nanox<P, S, A> extends Component<P, S> {
-  public actions!: NanoxActionMap<S, A>;
+interface InternalProps<S> {
+  actions: ActionMap<S>;
+  commands?: CommandMap;
+}
+type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
 
-  constructor(props: P & { actions: A, commands?: CommandMap }) {
+// class Nanox
+export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S> {
+  public actions!: NanoxActionMap<S, PropType<P, 'actions'>>;
+
+  constructor(props: P) {
     super(props);
     if (! ('actions' in props)) {
       throw new Error('requires the action props');
@@ -129,7 +135,7 @@ export default class Nanox<P, S, A> extends Component<P, S> {
     actionNames.forEach((evt) => {
       nanoxActions[evt] = this.createAction(actions[evt], (evt === '__error'));
     });
-    this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, A>;
+    this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, PropType<P, 'actions'>>;
   }
 
   // register custom commands for sandbox.update
