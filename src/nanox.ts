@@ -80,6 +80,10 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
       // Promise -> resolve -> updateStore
       result.then((data) => this.updateStore(data, done)).catch(this.actions.__error);
     } else {
+      // TODO
+      // const query = toQuery()  // if no command return null
+      // if (query == null) setState(result)
+      // else setState((state) => context.update(state, query))
       const isUpdate = (result instanceof LazyUpdater);
       // object or LazyUpdater -> setState
       const nextState = (isUpdate)

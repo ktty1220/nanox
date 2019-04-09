@@ -1,6 +1,10 @@
+English | [日本語](README_ja.md)
+
 # Nanox
 
 Minimal javaScript framework for React inspired by Flux.
+
+## Feature
 
 ## Install
 
@@ -36,7 +40,6 @@ const myActions = {
   }
 };
 
-// export
 export default myActions;
 ```
 
