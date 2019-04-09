@@ -218,7 +218,7 @@ const myActions = {
 
 ## 高度な使用方法
 
-### `this.query()`によるstateの相対的な更新
+### `this.query()`によるstateの更新
 
 アクション内ではstateの一部を返す方法の他に、`this.query()`を使用することによってMongoDBのようなクエリでstateを更新することもできます。
 
@@ -286,6 +286,32 @@ const myActions = {
 ```
 
 ユーザー定義コマンドの作成方法の詳細は[こちら](https://github.com/kolodny/immutability-helper#adding-your-own-commands)を参照してください。
+
+#### 補足
+
+`this.query`の中で通常のstate値直接指定を混在させることはできません。
+
+```js
+// Bad
+return this.query({
+  name: 'foo',
+  history: {
+    $push: [ 'change name' ]
+  }
+});
+```
+
+上記のように、state値直接指定と更新コマンドを同時に行いたい場合は、state値直接指定の部分を$setコマンドにします。
+
+```js
+// Bad
+return this.query({
+  name: { $set: 'foo' },
+  history: {
+    $push: [ 'change name' ]
+  }
+});
+```
 
 ### アクションチェーン
 
