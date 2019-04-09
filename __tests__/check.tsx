@@ -33,7 +33,7 @@ interface MyActions extends ActionMap<State> {
 // create actions of type MyActions
 const myActions: MyActions = {
   increment(count: number) {
-    return this.update({
+    return this.query({
       count: { $increment: count }
     });
   },

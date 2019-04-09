@@ -27,7 +27,7 @@
       const { memo, createContext, useContext, useState, useCallback } = React;
 
       /**
-       * create custom commands for update
+       * create custom commands for query
        * @see https://github.com/kolodny/immutability-helper#adding-your-own-commands
        */
       const myCommands = {
@@ -40,8 +40,8 @@
       const myActions = {
         // action name is 'increment'
         increment(count) {
-          // return update command
-          return this.update({
+          // return query command
+          return this.query({
             count: { $increment: count }
           });
         },

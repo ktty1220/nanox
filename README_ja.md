@@ -218,9 +218,9 @@ const myActions = {
 
 ## 高度な使用方法
 
-### `this.update()`によるstateの相対的な更新
+### `this.query()`によるstateの相対的な更新
 
-アクション内ではstateの一部を返す方法の他に、`this.update()`を使用することによってMongoDBのようなクエリでstateを更新することもできます。
+アクション内ではstateの一部を返す方法の他に、`this.query()`を使用することによってMongoDBのようなクエリでstateを更新することもできます。
 
 ```js
 class MainContainer extends Nanox {
@@ -240,8 +240,8 @@ class MainContainer extends Nanox {
 ```js
 const myActions = {
   addLemon(user) {
-    // アクション内で$pushコマンドによる配列の値の追加をthis.update()で指定してその戻り値を返す
-    return this.update({
+    // アクション内で$pushコマンドによる配列の値の追加をthis.query()で指定してその戻り値を返す
+    return this.query({
       fruits: {
         $push: [ 'lemon' ] // => stateは[ 'apple', 'banana', 'cherry', 'lemon' ]になる
       }
@@ -274,7 +274,7 @@ ReactDOM.render(
 const myActions = {
   increment() {
     // アクション内で$incrementコマンドを使用可能
-    return this.update({
+    return this.query({
       // value = 1, target = this.state.count
       count: { $increment: 1 }
     });
@@ -339,7 +339,7 @@ class MainContainer extends Nanox {
     .
   onSetState(data, type) {
     // data = 更新されようとしているstate部分もしくは更新コマンド
-    // type = 'state'もしくは'update'
+    // type = 'state'もしくは'query'
     if ( ... ) {
       // falseを返すとこのstate更新はブロックされる
       return false;

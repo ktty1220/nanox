@@ -4,18 +4,18 @@ import { Context } from 'immutability-helper';
 // util
 type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
 
-// define update commands
+// define query commands
 export interface CommandMap {
   [ command: string ]: (...args: any) => any;
 }
 type UpdateCommands<S> = { [K in keyof S]: any };
-class LazyUpdater<S> {
+class UpdateQuery<S> {
   constructor(public commands: UpdateCommands<Partial<S>>) {}
 }
 type NextState<S> = Partial<S> | UpdateCommands<Partial<S>>;
 
 // define actions
-type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | LazyUpdater<S>;
+type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | UpdateQuery<S>;
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 export interface ActionMap<S> {
   __error?: Action<S>;
@@ -28,7 +28,7 @@ export type NanoxActionMap<S, A> = { [ K in keyof (A & ActionMap<S>) ]: NanoxAct
 // define sandbox
 interface ActionSandbox<S> {
   state: S;
-  update(commands: UpdateCommands<Partial<S>>): LazyUpdater<S>;
+  query(commands: UpdateCommands<Partial<S>>): UpdateQuery<S>;
 }
 
 // class Nanox
@@ -80,21 +80,17 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
       // Promise -> resolve -> updateStore
       result.then((data) => this.updateStore(data, done)).catch(this.actions.__error);
     } else {
-      // TODO
-      // const query = toQuery()  // if no command return null
-      // if (query == null) setState(result)
-      // else setState((state) => context.update(state, query))
-      const isUpdate = (result instanceof LazyUpdater);
-      // object or LazyUpdater -> setState
-      const nextState = (isUpdate)
-        ? (result as LazyUpdater<S>).commands
+      const isQuery = (result instanceof UpdateQuery);
+      // object or UpdateQuery -> setState
+      const nextState = (isQuery)
+        ? (result as UpdateQuery<S>).commands
         : result as Partial<S>;
-      if (this.onSetState(this.clone(nextState), (isUpdate) ? 'update' : 'state') === false) {
+      if (this.onSetState(this.clone(nextState), (isQuery) ? 'query' : 'state') === false) {
         console.warn('setState() was blocked at onSetState()');
         return;
       }
       this.setState(
-        (isUpdate)
+        (isQuery)
         ? (currentState) => this.updateContext.update(currentState, nextState as any)
         : nextState,
         done
@@ -112,7 +108,7 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
           get state() {
             return self.clone(self.state || {}) as S;
           },
-          update: (commands) => new LazyUpdater(commands)
+          query: (commands) => new UpdateQuery(commands)
         };
 
         try {
@@ -143,7 +139,7 @@ export default class Nanox<P extends InternalProps<S>, S> extends Component<P, S
     this.actions = Object.freeze(nanoxActions) as NanoxActionMap<S, PropType<P, 'actions'>>;
   }
 
-  // register custom commands for sandbox.update function
+  // register custom commands for sandbox.query function
   private registerCommands(commandMap?: CommandMap): void {
     this.updateContext = new Context();
     if (commandMap == null) return;
