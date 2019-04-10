@@ -10,6 +10,14 @@ The feeling of use is close to Hyperapp(v1).
 
 ![flowchart](flowchart.png)
 
+* [Feature](#feature)
+* [Install](#install)
+* [Usage](#usage)
+* [Examples](#examples)
+* [Spec of Action](#spec-of-action)
+* [Advanced Usage](#advanced-usage)
+* [License](#license)
+
 ## Feature
 
 * Low learning costs
