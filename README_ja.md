@@ -4,13 +4,15 @@
 
 NanoxはReactを使用した小規模プロジェクト用のフレームワークです。
 
-素のReactだと物足りないがReduxのような規模感は必要ないケースでの使用を想定しています。
+素のReactだと物足りないがReduxのような規模は必要ないケースでの使用を想定しています。
 
 使用感としてはHyperapp(v1)に近い感じに仕上がっています。
 
+![flowchart](flowchart.png)
+
 ## 特徴
 
-* 低い教育コスト
+* 低い学習コスト
 * 目的に応じた複数のstate更新方法を提供
 * ビューとアクションを分離するのでビュー単体、アクション単体でのテストがしやすい
 
@@ -239,7 +241,7 @@ class MainContainer extends Nanox {
 
 ```js
 const myActions = {
-  addLemon(user) {
+  addLemon() {
     // アクション内で$pushコマンドによる配列の値の追加をthis.query()で指定してその戻り値を返す
     return this.query({
       fruits: {
@@ -289,7 +291,7 @@ const myActions = {
 
 #### 補足
 
-`this.query`の中で通常のstate値直接指定を混在させることはできません。
+`this.query()`の中で通常のstate値直接指定を混在させることはできません。
 
 ```js
 // Bad
@@ -354,7 +356,7 @@ const myActions = {
 
 ### state更新前フック
 
-アクションよってstateが更新される直前に実行されるフック処理をNanoxコンテナに登録する事ができます(`onSetState`メソッド)。
+アクションよってstateが更新される直前に実行されるフック処理をNanoxコンテナに登録する事ができます(`onSetState()`メソッド)。
 
 このフック処理で`false`を返すとそのstate更新は中止されます。
 
@@ -377,7 +379,7 @@ class MainContainer extends Nanox {
 };
 ```
 
-`onSetState`の引数である`data`は更新されようとしているstate部分のコピーなので、この値を直接変更しても更新内容が変わることはありません。
+`onSetState()`の引数である`data`は更新されようとしているstate部分のコピーなので、この値を直接変更しても更新内容が変わることはありません。
 
 ### TypeScriptでの使用方法
 

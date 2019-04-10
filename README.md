@@ -2,9 +2,19 @@ English | [日本語](README_ja.md)
 
 # Nanox
 
-Minimal javaScript framework for React inspired by Flux.
+Nanox is a minimal framework for small projects using React.
+
+It is intended to be used when you want to create a React application using some framework but you do not need to be as big as Redux.
+
+The feeling of use is close to Hyperapp(v1).
+
+![flowchart](flowchart.png)
 
 ## Feature
+
+* Low learning costs
+* Provides multiple state update methods depending on the purpose
+* Because views and actions are separated, it's easy to test each one alone.
 
 ## Install
 
@@ -15,6 +25,8 @@ $ npm install nanox
 ## Usage
 
 ### STEP 1 - Create actions
+
+First, create actions to use in child components.
 
 ```js
 const myActions = {
@@ -45,10 +57,13 @@ export default myActions;
 
 ### STEP 2 - Create child component
 
+Create child component that uses the actions created in STEP1.
+
+In the following example, the actions are received via `props`, but you may use `Context` instead.
+
 ```js
-// create stateless component(receive actions via props)
 const CounterComponent = ({ actions, count }) => {
-  // call actions that created at STEP 1
+  // execute action in click handler
   return (
     <div>
       <div>{count}</div>
@@ -64,6 +79,8 @@ export default CounterComponent;
 
 ### STEP 3 - Create Nanox container
 
+Create Naxox container to manage actions and child components.
+
 ```js
 // import React
 import React from 'react';
@@ -72,11 +89,11 @@ import ReactDOM from 'react-dom';
 // import Nanox
 import Nanox from 'nanox';
 
-// import child component
-import CounterComponent from './counter';
-
-// import actions
+// import actions created in STEP 1
 import myActions from './actions';
+
+// import child component created in STEP 2
+import CounterComponent from './counter';
 
 // create container (inherit Nanox)
 class MainContainer extends Nanox {
@@ -86,12 +103,19 @@ class MainContainer extends Nanox {
   }
 
   render() {
-    // pass this.actions to child component props
+    // pass this.actions to child component props (not this.props.actions)
     return <CounterComponent actions={this.actions} count{...this.state} />;
   }
 }
+```
 
-// mount Nanox container to DOM
+### STEP 4 - Mount the Nanox container
+
+Mount the Nanox container created in STEP 3 to the DOM.
+
+At this time, register the actions created in STEP 1 via props.
+
+```js
 ReactDOM.render(
   // register actions that created at STEP 1
   <MainContainer actions={myActions} />,
@@ -103,7 +127,7 @@ ReactDOM.render(
 
 ![Example Demo](demo.gif)
 
-* [Example file of this repository](https://github.com/ktty1220/nanox/blob/master/example.html)
+* [Example file of this repository](example.html)
 
 ## Spec of Action
 
@@ -157,12 +181,13 @@ const myActions = {
 
 ### Get the current state in actions
 
-The current state of the Nanox container can be get from `this.state`.
+You can get the current state in Nanox container from `this.state` in the action.
 
 ```js
 class MainContainer extends Nanox {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super (props);
+    // create state in Nanox container
     this.state = {
       count: 0,
       waiting: false
@@ -176,12 +201,12 @@ class MainContainer extends Nanox {
 
 ```js
 const myActions = {
-  increment(count) {
-    // get current state
+  increment (count) {
+    // get the current state in the action
     const currentState = this.state; // => {
-                                     //    count: 0,
-                                     //    waiting: false
-                                     // }
+                                     //  count: 0,
+                                     //  waiting: false
+                                     //}
       .
       .
       .
@@ -191,21 +216,20 @@ const myActions = {
 
 ##### Note
 
-`this.state` is copy of Nanox container's state.
-
-Changing this value directly has no effect for Nanox container.
+Since `this.state` is a copy of the latest state of the Nanox container, changing this value directly has no effect on the state of the Nanox container.
 
 ## Advanced Usage
 
-### `this.update()` function in actions
+### Updating state by `this.query()`
 
-You can return an update command like MongoDB's query language in actions using `this.update()`.
+You can also update the state in a MongoDB-like query by using `this.query()`.
 
 ```js
 class MainContainer extends Nanox {
   constructor(props) {
     super(props);
     this.state = {
+      // create state in Nanox container
       fruits: [ 'apple', 'banana', 'cherry' ]
     };
   },
@@ -217,9 +241,9 @@ class MainContainer extends Nanox {
 
 ```js
 const myActions = {
-  addLemon(user) {
-    // call this.update() function with command, and return functions result
-    return this.update({
+  addLemon() {
+    // call this.query() with $push command, and return functions result
+    return this.query({
       fruits: {
         $push: [ 'lemon' ] // => will be [ 'apple', 'banana', 'cherry', 'lemon' ]
       }
@@ -230,12 +254,13 @@ const myActions = {
     .
 };
 ```
+The available commands are [here](https://github.com/kolodny/immutability-helper#available-commands).
 
-And you can add custom command for `this.update()`.
+In addition to the above commands, you can also add custom commands.
 
 ```js
 ReactDOM.render(
-  // add $increment command on mounting Nanox container
+  // register $increment command when mounting Nanox container
   <MainContainer
     actions={myActions}
     commands={{
@@ -249,8 +274,8 @@ ReactDOM.render(
 ```js
 const myActions = {
   increment() {
-    // use $increment command in actions
-    return this.update({
+    // can use $increment command in action
+    return this.query({
       // value = 1, target = this.state.count
       count: { $increment: 1 }
     });
@@ -261,45 +286,35 @@ const myActions = {
 };
 ```
 
-[see more details](https://github.com/kolodny/immutability-helper#adding-your-own-commands).
+See [here](https://github.com/kolodny/immutability-helper#adding-your-own-commands) for details on how to create custom commands.
+
+##### Note
+
+Direct specification of state value can not be mixed in `this.query()`.
+
+```js
+// Bad
+return this.query({
+  name: 'foo',
+  history: { $push: [ 'change name' ] }
+});
+```
+
+If you want to execute the direct specification of status value and update command simultaneously as above, use `$set` command instead of direct specification of status value.
+
+```js
+// Bad
+return this.query({
+  name: { $set: 'foo' },
+  history: { $push: [ 'change name' ] }
+});
+```
 
 ### Action chaining
 
-Actions return Promise object, so you can invoke multiple actions synchronously.
+Calling an action in child components returns a Promise object that resolves when the action is completed, so you can perform multiple actions in sequence.
 
-```js
-const myActions = {
-  // show/hide loading message
-  loading(show) {
-    return {
-      loading: show
-    };
-  },
-  // fetch friends info from server
-  fetchFriends() {
-    return fetch('/friends')
-    .then((res) => res.json())
-    .then((friendsInfo) => {
-      return {
-        friends: friendsInfo
-      }
-    });
-  },
-  // send message to friends
-  sendMessage(text) {
-    const data = new FormData();
-    data.append('to', this.state.friends);
-    data.append('text', text);
-    fetch('/message', {
-      method: 'post',
-      body: data
-    });
-  },
-    .
-    .
-    .
-};
-```
+It is used, for example, to display the indicator when performing long actions in sequence and to clear the indicator when it is completed.
 
 ```js
 return (
@@ -315,30 +330,30 @@ return (
 
 ### Custom error handler
 
-Nanox implements default action `__error` that handling exception occurred in other actions.
+By default, Nanox has an action called `__error`. This is an action that is automatically called when an exception occurs in another action.
 
-Default `__error` action is a function that simply execute `console.error()`.
-
-You can overwrite `__error` action by implementing a same name function in your actions.
+The default `__error` action simply displays the content of the error in `console.error()`, but you can implement your own error handling by overriding the `__error` action.
 
 ```js
 const myActions = {
+  // other actions
     .
     .
     .
 
-  // overwrite '__error' action
+  // override default `__error` action
   __error(err) {
     // show alert dialog instead of console.error
     window.alert(err.message);
   }
-    .
-    .
-    .
 };
 ```
 
-### Hook method
+### Pre-update hook
+
+You can register a hook method(`onSetState()`) that will be executed just before the state is updated by the action.
+
+If `onSetState()` process returns `false`, this state updating is aborted.
 
 ```js
 class MainContainer extends Nanox {
@@ -346,8 +361,8 @@ class MainContainer extends Nanox {
     .
     .
   onSetState(data, type) {
-    // data = partial state or update command that will apply to Nanox state
-    // type = 'state' or 'update'
+    // data = partial state or update query that will apply to Nanox state
+    // type = 'state' or 'query'
     if ( ... ) {
       // You can block applying action result to state by returning false at onSetState()
       return false;
@@ -359,13 +374,13 @@ class MainContainer extends Nanox {
 };
 ```
 
-`nextState` is copy of Nanox container's state.
+##### Note
 
-Changing this value directly has no effect for Nanox container.
+Since the data that is the argument of `onSetState()` is a copy of the state part to be updated, changing this value directly will not change the updated contents.
 
 ### How to use from TypeScript
 
-see [here](https://github.com/ktty1220/nanox/blob/master/__tests__/check.tsx).
+see [here](__tests__/check.tsx).
 
 ## License
 

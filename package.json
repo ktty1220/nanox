@@ -1,9 +1,8 @@
 {
   "name": "nanox",
   "version": "0.2.0",
-  "description": "Minimal JavaScript framework for React inspired by Flux",
+  "description": "Minimal framework for small projects using React",
   "keywords": [
-    "flux",
     "framework",
     "react"
   ],
