@@ -169,7 +169,7 @@ const myActions = {
 };
 ```
 
-#### :heavy_check_mark: __Good__: return nothing (no effect for Nanox container)
+#### :heavy_check_mark: __Good__: return nothing (no effect on Nanox container)
 
 ```js
 const myActions = {
@@ -300,7 +300,7 @@ return this.query({
 });
 ```
 
-If you want to execute the direct specification of status value and update command simultaneously as above, use `$set` command instead of direct specification of status value.
+If you want to execute the direct specification of status value and query command simultaneously as above, use `$set` command instead of direct specification of status value.
 
 ```js
 // Bad
