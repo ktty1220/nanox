@@ -61,7 +61,7 @@ export default class Nanox<P extends InternalProps, S> extends Component<P, S> {
     return { ...obj };
   }
 
-  // obsolet
+  // obsolete
   protected dispatch(_action: string, ..._args: any[]): never {
     throw new Error(this.obsoleteMessage);
   }
