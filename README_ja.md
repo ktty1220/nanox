@@ -329,6 +329,8 @@ return this.query({
 
 何か長い処理を行う場合にまずローディングインジケータを表示して、それらが完了したらインジケーターを消去するといったケースに使用します。
 
+また、アクション内で発生したエラーを`catch`で補足できます。
+
 ```js
 return (
   <button onClick={
@@ -339,27 +341,6 @@ return (
     .catch(console.error);
   }>Say hello to my friends</button>
 );
-```
-
-### ユーザー定義エラーハンドラ
-
-Nanoxはデフォルトで`__error`というアクションを持っています。これは他のアクションで例外が発生した際に自動で呼び出されるアクションになります。
-
-デフォルトの`__error`アクションは単純にエラー内容を`console.error`で表示するだけですが、`__error`アクションを上書きすることにより、独自のエラー処理を実装することができます。
-
-```js
-const myActions = {
-  // 他のアクション
-    .
-    .
-    .
-
-  // __errorアクションを定義してデフォルトの__errorアクションを上書きする
-  __error(err) {
-    // console.errorではなくalertでエラーを表示するように変更する例
-    window.alert(err.message);
-  }
-};
 ```
 
 ### state更新前フック

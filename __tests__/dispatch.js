@@ -1,5 +1,5 @@
 /*eslint-env jest, es6*/
-import Nanox from '../src/nanox';
+import Nanox from '../src/nanox.js';
 
 describe('dispatch', () => {
   let nanox = null;

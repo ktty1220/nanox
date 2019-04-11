@@ -11,7 +11,6 @@ import * as ReactDOM from 'react-dom';
 // import types from Nanox
 import Nanox, {
   Action,
-  ActionMap,
   CommandMap,
   NanoxActionMap
 } from '../';
@@ -25,7 +24,7 @@ const myCommands: CommandMap = {
 };
 
 // define actions
-interface MyActions extends ActionMap<State> {
+interface MyActions {
   increment: Action<State>;
   decrement: Action<State>;
 }
@@ -50,7 +49,7 @@ const myActions: MyActions = {
 };
 
 // create context(pass the Nanox actions)
-const Context = createContext<NanoxActionMap<State, MyActions> | null>(null);
+const Context = createContext<NanoxActionMap<MyActions> | null>(null);
 
 interface CounterProps {
   count: number;

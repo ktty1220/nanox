@@ -324,6 +324,8 @@ Calling an action in child components returns a Promise object that resolves whe
 
 It is used, for example, to display the indicator when performing long actions in sequence and to clear the indicator when it is completed.
 
+And you can also catch errors that occur in actions with `catch`.
+
 ```js
 return (
   <button onClick={
@@ -334,27 +336,6 @@ return (
     .catch(console.error);
   }>Say hello to my friends</button>
 );
-```
-
-### Custom error handler
-
-By default, Nanox has an action called `__error`. This is an action that is automatically called when an exception occurs in another action.
-
-The default `__error` action simply displays the content of the error in `console.error()`, but you can implement your own error handling by overriding the `__error` action.
-
-```js
-const myActions = {
-  // other actions
-    .
-    .
-    .
-
-  // override default `__error` action
-  __error(err) {
-    // show alert dialog instead of console.error
-    window.alert(err.message);
-  }
-};
 ```
 
 ### Pre-update hook

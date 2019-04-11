@@ -1,20 +1,23 @@
 /*eslint-env jest, es6*/
-import Nanox from '../src/nanox';
+/*eslint-disable no-underscore-dangle*/
+import Nanox from '../src/nanox.js';
 
 describe('createAction', () => {
   let nanox = null;
+
   beforeEach(() => {
-    nanox = new Nanox({});
+    nanox = new Nanox({
+      actions: {}
+    });
     nanox.state = {
       title: 'foo',
       count: 0
     };
     nanox.setState = jest.fn();
-    nanox.dispatch = jest.fn();
   });
 
   test('object => setState called', () => {
-    expect.assertions(1);
+    expect.assertions(4);
     const expected = {
       count: 6
     };
@@ -23,18 +26,32 @@ describe('createAction', () => {
         count: x + y + z
       };
     })(1, 2, 3);
-    expect(nanox.setState.mock.calls).toEqual([ [ expected ] ]);
+    const calls = nanox.setState.mock.calls;
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toHaveLength(2);
+    expect(calls[0][0]).toEqual(expected);
+    expect(typeof calls[0][1]).toEqual('function');
   });
 
-  test('throw => __error action called', () => {
-    expect.assertions(4);
+  test('throw in action => action rejected', () => {
+    expect.assertions(2);
     const expected = 'lorem ipsum';
-    nanox.createAction((x, y, z) => {
+    const action = nanox.createAction((x, y, z) => {
       throw new Error(expected);
-    })(1, 2, 3);
+    });
+    expect(action(1, 2, 3)).rejects.toEqual(new Error(expected));
     expect(nanox.setState.mock.calls).toHaveLength(0);
-    expect(nanox.dispatch.mock.calls[0][0]).toBe('__error');
-    expect(nanox.dispatch.mock.calls[0][1]).toBeInstanceOf(Error);
-    expect(nanox.dispatch.mock.calls[0][1].message).toBe(expected);
+  });
+
+  test('throw in action (Promise) => action rejected', () => {
+    expect.assertions(2);
+    const expected = 'lorem ipsum';
+    const action = nanox.createAction((x, y, z) => (
+      new Promise((resolve, reject) => {
+        throw new Error(expected);
+      })
+    ));
+    expect(action(1, 2, 3)).rejects.toEqual(new Error(expected));
+    expect(nanox.setState.mock.calls).toHaveLength(0);
   });
 });

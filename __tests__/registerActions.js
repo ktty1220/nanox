@@ -1,58 +1,25 @@
 /*eslint-env jest, es6*/
-import Nanox from '../src/nanox';
+/*eslint-disable no-underscore-dangle*/
+import Nanox from '../src/nanox.js';
 
 describe('registerActions', () => {
   let nanox = null;
   beforeEach(() => {
-    nanox = new Nanox({});
-  });
-
-  test('before register => actions are empty', () => {
-    expect.assertions(1);
-    expect(nanox.emitter.eventNames()).toHaveLength(0);
+    nanox = new Nanox({ actions: {}});
+    nanox.actions = null;
   });
 
   test('after register => actions updated', () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const actions = {};
-    const expected = [ '__error' ];
+    const expected = [];
     [ ...Array(30).keys() ].forEach((n) => {
       const evt = `foo${n}`;
       actions[evt] = () => null;
       expected.push(evt);
     });
     nanox.registerActions(actions);
-    expect(nanox.emitter.eventNames()).toEqual(expected);
-    // eslint-disable-next-line no-underscore-dangle
-    expect(nanox.emitter._maxListeners).toEqual(expected.length);
-  });
-
-  test('omit __error => use default __error action', () => {
-    expect.assertions(1);
-    const spyLog = jest.spyOn(console, 'error');
-    spyLog.mockImplementation((x) => x);
-    nanox.registerActions({
-      foo() {
-        return null;
-      }
-    });
-    const message = 'lorem ipsum';
-    nanox.emitter.emit('__error', new Error(message));
-    expect(console.error).toBeCalledWith(message);
-  });
-
-  test('overwrite __error => overwrite default __error action', () => {
-    expect.assertions(1);
-    const spyLog = jest.spyOn(console, 'error');
-    spyLog.mockImplementation((x) => x);
-    nanox.registerActions({
-      __error(err) {
-        console.error(`[ERROR] ${err.message}`);
-      }
-    });
-    const message = 'lorem ipsum';
-    nanox.emitter.emit('__error', new Error(message));
-    expect(console.error).toBeCalledWith(`[ERROR] ${message}`);
+    expect(Object.keys(nanox.actions)).toEqual(expected);
   });
 
   test('duplicate register => throw', () => {
@@ -72,40 +39,27 @@ describe('registerActions', () => {
     .toThrow('actions are already registered');
   });
 
-  test('invalid __error action => throw', () => {
-    expect.assertions(1);
-    nanox.registerActions({
-      foo(message) {
-        throw new Error(message);
-      },
-      __error(err) {
-        err.x();
-      }
-    });
-    expect(() => nanox.dispatch('foo')).toThrow('err.x is not a function');
-  });
-
-  test('sandbox', (done) => {
-    expect.assertions(3);
+  test('sandbox', () => {
+    expect.assertions(6);
     nanox.state = {
       title: 'foo',
       count: 0
     };
     nanox.setState = jest.fn();
-    /*eslint-disable no-invalid-this*/
     nanox.registerActions({
-      foo() {
-        this.dispatch('bar', 'baz');
-        expect(Object.keys(this)).toEqual([ 'getState', 'dispatch', 'update' ]);
-        expect(this.getState()).toEqual(nanox.state);
-        expect(nanox.setState.mock.calls).toEqual([ [{ title: 'baz' }] ]);
-        done();
-      },
-      bar(title) {
+      foo(title) {
+        /*eslint-disable no-invalid-this*/
+        expect(Object.keys(this)).toEqual([ 'state', 'query' ]);
+        expect(this.state).toEqual(nanox.state);
+        /*eslint-enable no-invalied-this*/
         return { title };
       }
     });
-    nanox.dispatch('foo');
-    /*eslint-enable no-invalied-this*/
+    nanox.actions.foo('bar');
+    const calls = nanox.setState.mock.calls;
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toHaveLength(2);
+    expect(calls[0][0]).toEqual({ title: 'bar' });
+    expect(typeof calls[0][1]).toEqual('function');
   });
 });
