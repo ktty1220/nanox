@@ -311,7 +311,7 @@ return this.query({
 If you want to execute the direct specification of status value and query command simultaneously as above, use `$set` command instead of direct specification of status value.
 
 ```js
-// Bad
+// Good
 return this.query({
   name: { $set: 'foo' },
   history: { $push: [ 'change name' ] }

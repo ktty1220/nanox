@@ -314,7 +314,7 @@ return this.query({
 上記のように、state値直接指定と更新コマンドを同時に行いたい場合は、state値直接指定の部分を$setコマンドにします。
 
 ```js
-// Bad
+// Good
 return this.query({
   name: { $set: 'foo' },
   history: {
