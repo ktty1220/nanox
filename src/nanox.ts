@@ -40,11 +40,12 @@ interface InternalProps {
 export default class Nanox<P extends InternalProps, S> extends Component<P, S> {
   public actions!: NanoxActionMap<PropType<P, 'actions'>>;
   private updateContext!: Context;
+  private obsoleteMessage = 'Nanox version 0.2.0 has many breaking changes from version 0.1.x.\nsee https://github.com/ktty1220/nanox';
 
   constructor(props: P) {
     super(props);
     if (! ('actions' in props)) {
-      throw new Error('requires the action props');
+      throw new Error(`requires the action props\n(${this.obsoleteMessage})`);
     }
     this.registerActions(props.actions);
     this.registerCommands(props.commands);
@@ -60,9 +61,9 @@ export default class Nanox<P extends InternalProps, S> extends Component<P, S> {
     return { ...obj };
   }
 
-  // ver 0.1.x
+  // obsolet
   protected dispatch(_action: string, ..._args: any[]): never {
-    throw new Error('Nanox version 0.2.0 has many breaking changes from version 0.1.x.\nsee https://github.com/ktty1220/nanox');
+    throw new Error(this.obsoleteMessage);
   }
 
   // apply action result to state
