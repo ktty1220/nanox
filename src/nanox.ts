@@ -3,7 +3,7 @@ import { Context } from 'immutability-helper';
 
 // util
 type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
-type VoidFunc = () => void;
+type VoidFunc = (arg?: any) => void;
 
 // define query commands
 export interface CommandMap {
@@ -69,34 +69,40 @@ export default class Nanox<P extends InternalProps, S> extends Component<P, S> {
   // apply action result to state
   private updateStore(result: ActionResult<S>, resolve: VoidFunc, reject: VoidFunc): void {
     // null or undefined -> skip
-    if (result == null) return;
+    if (result == null) {
+      resolve();
+      return;
+    }
 
     // not object -> error
     const type = (Array.isArray(result)) ? 'array' : typeof result;
     if (type !== 'object') {
-      throw new Error(`invalid action result: ${result} is ${type}`);
+      reject(new Error(`invalid action result: ${result} is ${type}`));
+      return;
     }
 
     if (result instanceof Promise) {
       // Promise -> resolve -> updateStore
       result.then((data) => this.updateStore(data, resolve, reject)).catch(reject);
-    } else {
-      const isQuery = (result instanceof UpdateQuery);
-      // object or UpdateQuery -> setState
-      const nextState = (isQuery)
-        ? (result as UpdateQuery<S>).commands
-        : result as Partial<S>;
-      if (this.onSetState(this.clone(nextState), (isQuery) ? 'query' : 'state') === false) {
-        console.warn('setState() was blocked at onSetState()');
-        return;
-      }
-      this.setState(
-        (isQuery)
-        ? (currentState) => this.updateContext.update(currentState, nextState as any)
-        : nextState,
-        resolve
-      );
+      return;
     }
+
+    const isQuery = (result instanceof UpdateQuery);
+    // object or UpdateQuery -> setState
+    const nextState = (isQuery)
+    ? (result as UpdateQuery<S>).commands
+    : result as Partial<S>;
+    if (this.onSetState(this.clone(nextState), (isQuery) ? 'query' : 'state') === false) {
+      console.warn('setState() was blocked at onSetState()');
+      resolve();
+      return;
+    }
+    this.setState(
+      (isQuery)
+      ? (currentState) => this.updateContext.update(currentState, nextState as any)
+      : nextState,
+      resolve
+    );
   }
 
   // create function that execute action and update state
