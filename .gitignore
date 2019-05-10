@@ -1,4 +1,3 @@
-.buildifchanged/
 node_modules/
 coverage/
 dist/

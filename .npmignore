@@ -1,9 +1,7 @@
-.buildifchanged/
 __tests__/
 coverage/
 src/*.js
 src/*.js.map
-buildconfig
 demo.gif
 webpack.config.js
 tsconfig.json
