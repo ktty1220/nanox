@@ -230,7 +230,7 @@ Since `this.state` is a copy of the latest state of the Nanox container, changin
 
 ### Updating state by `this.query()`
 
-You can also update the state in a MongoDB-like query by using `this.query()`.
+You can also update the state by MongoDB-like query using `this.query()`.
 
 ```js
 class MainContainer extends Nanox {
@@ -324,7 +324,7 @@ Calling an action in child components returns a Promise object that resolves whe
 
 It is used, for example, to display the indicator when performing long actions in sequence and to clear the indicator when it is completed.
 
-And you can also catch errors that occur in actions with `catch`.
+And you can also catch errors that occur in actions using `catch`.
 
 ```js
 return (
@@ -375,4 +375,4 @@ see [here](__tests__/check.tsx).
 
 [MIT](http://www.opensource.org/licenses/mit-license)
 
-&copy; 2019 [ktty1220](mailto:ktty1220@gmail.com)
+&copy; 2017-2019 [ktty1220](mailto:ktty1220@gmail.com)
