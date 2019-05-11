@@ -1,6 +1,6 @@
 {
   "name": "nanox",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Minimal framework for small projects using React",
   "keywords": [
     "framework",
@@ -49,7 +49,7 @@
     "webpack-dev-server": "^3.3.1"
   },
   "peerDependencies": {
-    "react": "^16.8.6"
+    "react": "^16.0.0"
   },
   "babel": {
     "presets": [
