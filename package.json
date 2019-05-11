@@ -11,23 +11,22 @@
     "name": "ktty1220",
     "email": "ktty1220@gmail.com"
   },
-  "main": "dist/nanox.js",
+  "main": "cjs/nanox.js",
   "typings": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ktty1220/nanox.git"
   },
   "scripts": {
-    "build": "webpack",
-    "watch": "webpack -w",
+    "clean": "rimraf cjs umd",
+    "build": "webpack && tsc",
     "dev": "webpack-dev-server",
     "prepare": "npm run build",
-    "before-test": "tsc",
-    "after-test": "rimraf src/nanox{.js.map,.js}",
+    "compile": "tsc",
     "exec-test": "jest || true",
     "exec-cov": "jest --coverage || true",
-    "test": "run-s before-test exec-test after-test",
-    "cov": "run-s before-test exec-cov after-test"
+    "test": "run-s compile exec-test",
+    "cov": "run-s compile exec-cov"
   },
   "dependencies": {
     "immutability-helper": "^3.0.0"

@@ -1,5 +1,5 @@
 /*eslint-env jest, es6*/
-import Nanox from '../src/nanox.js';
+import Nanox from '../cjs/nanox.js';
 
 class NanoxOnSetState extends Nanox {
   constructor(props) {

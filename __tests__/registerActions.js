@@ -1,6 +1,6 @@
 /*eslint-env jest, es6*/
 /*eslint-disable no-underscore-dangle*/
-import Nanox from '../src/nanox.js';
+import Nanox from '../cjs/nanox.js';
 
 describe('registerActions', () => {
   let nanox = null;

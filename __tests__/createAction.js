@@ -1,6 +1,6 @@
 /*eslint-env jest, es6*/
 /*eslint-disable no-underscore-dangle, no-invalid-this*/
-import Nanox from '../src/nanox.js';
+import Nanox from '../cjs/nanox.js';
 
 describe('createAction', () => {
   let nanox = null;

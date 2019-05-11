@@ -1,7 +1,5 @@
 __tests__/
 coverage/
-src/*.js
-src/*.js.map
 demo.gif
 webpack.config.js
 tsconfig.json
