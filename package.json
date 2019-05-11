@@ -12,6 +12,7 @@
     "email": "ktty1220@gmail.com"
   },
   "main": "cjs/nanox.js",
+  "unpkg": "umd/nanox.js",
   "typings": "index.d.ts",
   "repository": {
     "type": "git",

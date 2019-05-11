@@ -112,7 +112,7 @@ class MainContainer extends Nanox {
 
   render() {
     // 子コンポーネントの呼び出し時にthis.actionsをpropsに渡す
-    return <CounterComponent actions={this.actions} count{...this.state} />;
+    return <CounterComponent actions={this.actions} {...this.state} />;
   }
 }
 ```

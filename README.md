@@ -112,7 +112,7 @@ class MainContainer extends Nanox {
 
   render() {
     // pass this.actions to child component props (not this.props.actions)
-    return <CounterComponent actions={this.actions} count{...this.state} />;
+    return <CounterComponent actions={this.actions} {...this.state} />;
   }
 }
 ```
