@@ -136,6 +136,7 @@ ReactDOM.render(
 ![Example Demo](demo.gif)
 
 * [このリポジトリのexample.html](example.html)
+* [シンプルなカウンタープロジェクト](https://github.com/ktty1220/nanox-example)
 
 ## アクションの仕様
 
