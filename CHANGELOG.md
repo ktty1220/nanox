@@ -1,7 +1,7 @@
-# 0.2.0 (2019-04-xx)
+# 0.2.0 (2019-05-11)
 
-* Added mongodb like state update support (via immutability-helper)
-* Changed to be able to set actions to props of Nanox container
+* Added MongoDB-like query support (via immutability-helper)
+* Changed the actions specification to be through container Prop instead of registerActions()
 * Changed library format to UMD
 * Update dependencies
 
