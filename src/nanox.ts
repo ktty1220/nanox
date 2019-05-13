@@ -56,7 +56,7 @@ export default class Nanox<P extends InternalProps, S> extends Component<P, S> {
   }
 
   // setState hook
-  protected onSetState(_nextState: NextState<S>, _type: string): boolean {
+  protected onSetState(_nextState: NextState<S>, _type: string): boolean | void {
     return true;
   }
 

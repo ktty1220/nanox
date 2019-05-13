@@ -95,6 +95,14 @@ class MainContainer extends Nanox<MainProps, State> {
     this.state = { count: 0 };
   }
 
+  protected onSetState(data: Partial<State>, type: string) {
+    console.info('state will update', { data, type });
+  }
+
+  public componentWillUpdate(_props: MainProps, state: State) {
+    console.info('new state', state);
+  }
+
   public render() {
     return (
       <Context.Provider value={this.actions}>
