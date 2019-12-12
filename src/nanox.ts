@@ -13,10 +13,10 @@ type UpdateCommands<S> = { [K in keyof S]: any };
 class UpdateQuery<S> {
   constructor(public commands: UpdateCommands<Partial<S>>) {}
 }
-type NextState<S> = Partial<S> | UpdateCommands<Partial<S>>;
+export type NextState<S> = Partial<S> | UpdateCommands<Partial<S>>;
 
 // define actions
-type ActionResult<S> = void | Partial<S> | Promise<Partial<S>> | UpdateQuery<S>;
+type ActionResult<S> = void | Partial<S> | Promise<Partial<S> | UpdateQuery<S>> | UpdateQuery<S>;
 export type Action<S> = (this: ActionSandbox<S>, ...args: any[]) => ActionResult<S>;
 interface ActionMap<S> {
   [ name: string ]: Action<S>;

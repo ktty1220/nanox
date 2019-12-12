@@ -12,7 +12,8 @@ import * as ReactDOM from 'react-dom';
 import Nanox, {
   Action,
   CommandMap,
-  NanoxActionMap
+  NanoxActionMap,
+  NextState
 } from '../';
 
 interface State {
@@ -26,12 +27,20 @@ const myCommands: CommandMap = {
 // define actions
 interface MyActions {
   increment: Action<State>;
+  incrementQ: Action<State>;
   decrement: Action<State>;
+  decrementQ: Action<State>;
 }
 
 // create actions of type MyActions
 const myActions: MyActions = {
   increment(count: number) {
+    return {
+      count: this.state.count + count
+    };
+  },
+
+  incrementQ(count: number) {
     return this.query({
       count: { $increment: count }
     });
@@ -43,6 +52,16 @@ const myActions: MyActions = {
         resolve({
           count: this.state.count - count
         });
+      }, 1000);
+    });
+  },
+
+  decrementQ(count: number) {
+    return new Promise((resolve, _reject) => {
+      setTimeout(() => {
+        resolve(this.query({
+          count: { $decrement: count }
+        }));
       }, 1000);
     });
   }
@@ -60,12 +79,12 @@ const CounterComponent: FC<CounterProps> = memo(({ count }) => {
 
   const increment1 = useCallback(() => actions.increment(1), []);
   const decrement1 = useCallback(() => actions.decrement(1), []);
-  const increment100 = useCallback(() => actions.increment(100), []);
+  const increment100 = useCallback(() => actions.incrementQ(100), []);
   const step = useCallback(() => {
     setDisabled(true);
     actions.increment(1)
     .then(() => actions.decrement(1))
-    .then(() => actions.decrement(1))
+    .then(() => actions.decrementQ(1))
     .then(() => new Promise((resolve) => setTimeout(resolve, Math.random() * 3000)))
     .then(() => actions.increment(1))
     .then(() => setDisabled(false))
@@ -95,7 +114,7 @@ class MainContainer extends Nanox<MainProps, State> {
     this.state = { count: 0 };
   }
 
-  protected onSetState(data: Partial<State>, type: string) {
+  protected onSetState(data: NextState<State>, type: string) {
     console.info('state will update', { data, type });
   }
 
