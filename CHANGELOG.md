@@ -1,4 +1,9 @@
-# 0.2.0 (2019-05-11)
+# 0.2.3 (2019-12-12)
+
+* Fixed type error when returning query with Promise in action method
+* Update dependencies
+
+# 0.2.0 - 0.2.2 (2019-05-11)
 
 * Added MongoDB-like query support (via immutability-helper)
 * Changed the actions specification to be through container Prop instead of registerActions()
